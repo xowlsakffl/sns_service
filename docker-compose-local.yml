@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  sns-redis:
+    container_name: sns-redis
+    build:
+      dockerfile: Dockerfile
+      context: ./redis
+    image: ms111401/sns-redis
+    ports:
+      - "6379:6379"
+  sns-database:
+    container_name: sns-database
+    build:
+      dockerfile: Dockerfile
+      context: ./database
+    image: ms111401/sns-database
+    environment:
+      - MARIADB_DATABASE=${SPRING_DATASOURCE_USERNAME}
+      - MARIADB_ROOT_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+    volumes:
+      - ./database/config:/etc/mysql/conf.d
+      - ./database/init:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
