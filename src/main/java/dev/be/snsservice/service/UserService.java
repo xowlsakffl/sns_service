@@ -27,6 +27,11 @@ public class UserService {
     @Value("${jwt.token.expired-time-ms}")
     private Long expiredTimeMs;
 
+    public User loadUserByUsername(String username) {
+        return userEntityRepository.findByUsername(username).map(User::fromEntity).orElseThrow(() ->
+                new SnsApplicationException(ErrorCode.DUPLICATED_USERNAME, String.format("%s is duplicated", username)));
+    }
+
     @Transactional
     public User join(String username, String password){
         // 회원가입 username이 이미 있는지
