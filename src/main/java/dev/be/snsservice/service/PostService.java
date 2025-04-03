@@ -2,6 +2,7 @@ package dev.be.snsservice.service;
 
 import dev.be.snsservice.exception.ErrorCode;
 import dev.be.snsservice.exception.SnsApplicationException;
+import dev.be.snsservice.model.Post;
 import dev.be.snsservice.model.entity.PostEntity;
 import dev.be.snsservice.model.entity.UserEntity;
 import dev.be.snsservice.repository.PostEntityRepository;
@@ -25,10 +26,34 @@ public class PostService {
     }
 
     @Transactional
-    public void modify(String title, String body, String username, Integer postId){
+    public Post modify(String title, String body, String username, Integer postId){
         UserEntity userEntity = userEntityRepository.findByUsername(username).orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", username)));
         // post exist
-
+        PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() ->
+                new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not found", postId)));
         // post permission
+        if(postEntity.getUser() != userEntity){
+            throw new SnsApplicationException(ErrorCode.INVALID_PERMISSION, String.format("%s has no permission with %s", username, postId));
+        }
+
+        postEntity.setTitle(title);
+        postEntity.setBody(body);
+
+        return Post.fromEntity(postEntityRepository.save(postEntity));
     }
+
+    @Transactional
+    public void delete(String username,Integer postId){
+        UserEntity userEntity = userEntityRepository.findByUsername(username).orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", username)));
+        // post exist
+        PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() ->
+                new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not found", postId)));
+
+        if(postEntity.getUser() != userEntity){
+            throw new SnsApplicationException(ErrorCode.INVALID_PERMISSION, String.format("%s has no permission with %s", username, postId));
+        }
+
+        postEntityRepository.delete(postEntity);
+    }
+
 }
