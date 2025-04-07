@@ -2,12 +2,16 @@ package dev.be.snsservice.service;
 
 import dev.be.snsservice.exception.ErrorCode;
 import dev.be.snsservice.exception.SnsApplicationException;
+import dev.be.snsservice.model.Alarm;
 import dev.be.snsservice.model.User;
 import dev.be.snsservice.model.entity.UserEntity;
+import dev.be.snsservice.repository.AlarmEntityRepository;
 import dev.be.snsservice.repository.UserEntityRepository;
 import dev.be.snsservice.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +23,7 @@ import java.util.Optional;
 public class UserService {
 
     private final UserEntityRepository userEntityRepository;
+    private final AlarmEntityRepository alarmEntityRepository;
     private final BCryptPasswordEncoder encoder;
 
     @Value("${jwt.secret-key}")
@@ -58,5 +63,9 @@ public class UserService {
         // 토큰 생성
 
         return JwtTokenUtils.generateToken(username, secretKey, expiredTimeMs);
+    }
+
+    public Page<Alarm> alarmList(Integer userId, Pageable pageable) {
+        return alarmEntityRepository.findAllByUserId(userId, pageable).map(Alarm::fromEntity);
     }
 }
