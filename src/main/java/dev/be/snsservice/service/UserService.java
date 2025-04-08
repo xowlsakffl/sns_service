@@ -6,6 +6,7 @@ import dev.be.snsservice.model.Alarm;
 import dev.be.snsservice.model.User;
 import dev.be.snsservice.model.entity.UserEntity;
 import dev.be.snsservice.repository.AlarmEntityRepository;
+import dev.be.snsservice.repository.UserCacheRepository;
 import dev.be.snsservice.repository.UserEntityRepository;
 import dev.be.snsservice.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class UserService {
     private final UserEntityRepository userEntityRepository;
     private final AlarmEntityRepository alarmEntityRepository;
     private final BCryptPasswordEncoder encoder;
+    private final UserCacheRepository userCacheRepository;
 
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -33,8 +35,10 @@ public class UserService {
     private Long expiredTimeMs;
 
     public User loadUserByUsername(String username) {
-        return userEntityRepository.findByUsername(username).map(User::fromEntity).orElseThrow(() ->
-                new SnsApplicationException(ErrorCode.DUPLICATED_USERNAME, String.format("%s is duplicated", username)));
+        return userCacheRepository.getUser(username).orElseGet(() ->
+            userEntityRepository.findByUsername(username).map(User::fromEntity).orElseThrow(() ->
+                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("username is %s", username)))
+        );
     }
 
     @Transactional
@@ -53,10 +57,11 @@ public class UserService {
 
     public String login(String username, String password){
         // 회원가입 여부 체크
-        UserEntity userEntity = userEntityRepository.findByUsername(username).orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s is not found", username)));
+        User user = loadUserByUsername(username);
+        userCacheRepository.setUser(user);
 
         // 비밀번호 체크
-        if(!encoder.matches(password, userEntity.getPassword())){
+        if(!encoder.matches(password, user.getPassword())){
             throw new SnsApplicationException(ErrorCode.INVALID_PASSWORD);
         }
 
