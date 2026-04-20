@@ -14,6 +14,8 @@ public class Post {
     private String title;
     private String body;
     private User user;
+    private boolean blinded;
+    private Timestamp blindedAt;
     private Timestamp registeredAt;
     private Timestamp updatedAt;
     private Timestamp deletedAt;
@@ -24,6 +26,8 @@ public class Post {
                 entity.getTitle(),
                 entity.getBody(),
                 User.fromEntity(entity.getUser()),
+                entity.isBlinded(),
+                entity.getBlindedAt(),
                 entity.getRegisteredAt(),
                 entity.getUpdatedAt(),
                 entity.getDeletedAt()

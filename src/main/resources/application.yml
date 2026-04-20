@@ -35,7 +35,7 @@ spring:
     show-sql: true
 
 jwt:
-  secret-key: fast_campus.sns-application-2025.secret-key
+  secret-key: ${JWT_SECRET_KEY:fast_campus.sns-application-2025.secret-key}
   # 30 days
   token.expired-time-ms: 2592000
 

@@ -7,12 +7,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +35,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         try {
             if (TOKEN_IN_PARAM_URLS.contains(request.getRequestURI())) {
                 log.info("Request with {} check the query param", request.getRequestURI());
-                token = request.getQueryString().split("=")[1].trim();
+                String tokenInParam = request.getParameter("token");
+                if (tokenInParam == null || tokenInParam.isBlank()) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+                token = tokenInParam.trim();
             }else{
                 final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
                 if (header == null || !header.startsWith("Bearer ")) {

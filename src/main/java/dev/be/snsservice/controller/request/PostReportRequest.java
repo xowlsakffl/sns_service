@@ -3,15 +3,15 @@ package dev.be.snsservice.controller.request;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Data
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostCommentRequest {
+public class PostReportRequest {
 
-    @NotBlank(message = "comment is required")
-    @Size(max = 1000, message = "comment must be at most 1000 characters")
-    private String comment;
+    @NotBlank(message = "reason is required")
+    @Size(max = 500, message = "reason must be at most 500 characters")
+    private String reason;
 }

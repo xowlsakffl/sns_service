@@ -1,6 +1,5 @@
 package dev.be.snsservice.model.entity;
 
-import dev.be.snsservice.model.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,6 +44,12 @@ public class PostEntity {
     @Column(name = "deleted_at")
     private Timestamp deletedAt;
 
+    @Column(name = "blinded")
+    private boolean blinded = false;
+
+    @Column(name = "blinded_at")
+    private Timestamp blindedAt;
+
     @PrePersist
     void registeredAt() {
         this.registeredAt = Timestamp.from(Instant.now());
@@ -62,5 +67,15 @@ public class PostEntity {
         entity.setUser(userEntity);
 
         return entity;
+    }
+
+    public void blind() {
+        this.blinded = true;
+        this.blindedAt = Timestamp.from(Instant.now());
+    }
+
+    public void unblind() {
+        this.blinded = false;
+        this.blindedAt = null;
     }
 }

@@ -12,6 +12,7 @@ import dev.be.snsservice.model.User;
 import dev.be.snsservice.service.AlarmService;
 import dev.be.snsservice.service.UserService;
 import dev.be.snsservice.util.ClassUtils;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,16 +29,13 @@ public class UserController {
     private final AlarmService alarmService;
 
     @PostMapping("/join")
-    public Response<UserJoinResponse> join(@RequestBody UserJoinRequest request){
-        System.out.println("Request Name: " + request.getName());
-        System.out.println("Request Password: " + request.getPassword());
-
+    public Response<UserJoinResponse> join(@Valid @RequestBody UserJoinRequest request){
         User user = userService.join(request.getName(), request.getPassword());
         return Response.success(UserJoinResponse.fromUser(user));
     }
 
     @PostMapping("/login")
-    public Response<UserLoginResponse> login(@RequestBody UserLoginRequest request){
+    public Response<UserLoginResponse> login(@Valid @RequestBody UserLoginRequest request){
         String token = userService.login(request.getName(), request.getPassword());
         return Response.success(new UserLoginResponse(token));
     }

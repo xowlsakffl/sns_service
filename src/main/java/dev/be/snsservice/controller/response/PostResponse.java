@@ -14,6 +14,8 @@ public class PostResponse {
     private String title;
     private String body;
     private UserResponse user;
+    private boolean blinded;
+    private Timestamp blindedAt;
     private Timestamp registeredAt;
     private Timestamp updatedAt;
     private Timestamp deletedAt;
@@ -24,6 +26,8 @@ public class PostResponse {
                 post.getTitle(),
                 post.getBody(),
                 UserResponse.fromUser(post.getUser()),
+                post.isBlinded(),
+                post.getBlindedAt(),
                 post.getRegisteredAt(),
                 post.getUpdatedAt(),
                 post.getDeletedAt()

@@ -36,37 +36,37 @@ public class UserService {
 
     public User loadUserByUsername(String username) {
         return userCacheRepository.getUser(username).orElseGet(() ->
-            userEntityRepository.findByUsername(username).map(User::fromEntity).orElseThrow(() ->
-                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("username is %s", username)))
+                userEntityRepository.findByUsername(username)
+                        .map(User::fromEntity)
+                        .map(user -> {
+                            userCacheRepository.setUser(user);
+                            return user;
+                        })
+                        .orElseThrow(() ->
+                                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("username is %s", username)))
         );
     }
 
     @Transactional
     public User join(String username, String password){
-        // 회원가입 username이 이미 있는지
         Optional<UserEntity> user = userEntityRepository.findByUsername(username);
         if(user.isPresent()){
             throw new SnsApplicationException(ErrorCode.DUPLICATED_USERNAME, String.format("%s is duplicated", username));
         }
 
-        // 회원가입 진행
         UserEntity userEntity = userEntityRepository.save(UserEntity.of(username, encoder.encode(password)));
 
         return User.fromEntity(userEntity);
     }
 
     public String login(String username, String password){
-        // 회원가입 여부 체크
         User user = loadUserByUsername(username);
-        userCacheRepository.setUser(user);
 
-        // 비밀번호 체크
         if(!encoder.matches(password, user.getPassword())){
             throw new SnsApplicationException(ErrorCode.INVALID_PASSWORD);
         }
 
-        // 토큰 생성
-
+        userCacheRepository.setUser(user);
         return JwtTokenUtils.generateToken(username, secretKey, expiredTimeMs);
     }
 

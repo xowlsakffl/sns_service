@@ -3,11 +3,14 @@ package dev.be.snsservice.controller;
 import dev.be.snsservice.controller.request.PostCommentRequest;
 import dev.be.snsservice.controller.request.PostCreateRequest;
 import dev.be.snsservice.controller.request.PostModifyRequest;
+import dev.be.snsservice.controller.request.PostReportRequest;
 import dev.be.snsservice.controller.response.CommentResponse;
 import dev.be.snsservice.controller.response.PostResponse;
+import dev.be.snsservice.controller.response.PostReportResponse;
 import dev.be.snsservice.controller.response.Response;
 import dev.be.snsservice.model.Post;
 import dev.be.snsservice.service.PostService;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,13 +26,13 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public Response<Void> create(@RequestBody PostCreateRequest request, Authentication authentication){
+    public Response<Void> create(@Valid @RequestBody PostCreateRequest request, Authentication authentication){
         postService.create(request.getTitle(), request.getBody(), authentication.getName());
         return Response.success();
     }
 
     @PutMapping("/{postId}")
-    public Response<PostResponse> modify(@PathVariable Integer postId, @RequestBody PostModifyRequest request, Authentication authentication){
+    public Response<PostResponse> modify(@PathVariable Integer postId, @Valid @RequestBody PostModifyRequest request, Authentication authentication){
         Post post = postService.modify(request.getTitle(), request.getBody(), authentication.getName(), postId);
         return Response.success(PostResponse.fromPost(post));
     }
@@ -62,7 +65,7 @@ public class PostController {
     }
 
     @PostMapping("/{postId}/comments")
-    public Response<Void> comment(@PathVariable Integer postId, @RequestBody PostCommentRequest request, Authentication authentication){
+    public Response<Void> comment(@PathVariable Integer postId, @Valid @RequestBody PostCommentRequest request, Authentication authentication){
         postService.comment(postId, authentication.getName(), request.getComment());
         return Response.success();
     }
@@ -70,5 +73,28 @@ public class PostController {
     @GetMapping("/{postId}/comments")
     public Response<Page<CommentResponse>> comment(@PathVariable Integer postId, Pageable pageable, Authentication authentication){
         return Response.success(postService.getComments(postId, pageable).map(CommentResponse::fromComment));
+    }
+
+    @PostMapping("/{postId}/reports")
+    public Response<Void> report(@PathVariable Integer postId, @Valid @RequestBody PostReportRequest request, Authentication authentication){
+        postService.report(postId, authentication.getName(), request.getReason());
+        return Response.success();
+    }
+
+    @GetMapping("/reports")
+    public Response<Page<PostReportResponse>> reports(Pageable pageable, Authentication authentication){
+        return Response.success(postService.reportList(authentication.getName(), pageable).map(PostReportResponse::fromReport));
+    }
+
+    @PatchMapping("/reports/{reportId}/accept-blind")
+    public Response<Void> acceptBlind(@PathVariable Integer reportId, Authentication authentication){
+        postService.acceptAndBlind(reportId, authentication.getName());
+        return Response.success();
+    }
+
+    @PatchMapping("/reports/{reportId}/reject")
+    public Response<Void> reject(@PathVariable Integer reportId, Authentication authentication){
+        postService.rejectReport(reportId, authentication.getName());
+        return Response.success();
     }
 }

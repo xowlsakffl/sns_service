@@ -31,7 +31,7 @@ public class AlarmService {
     }
 
     public SseEmitter connectAlarm(Integer userId){
-        SseEmitter sseEmitter = new SseEmitter();
+        SseEmitter sseEmitter = new SseEmitter(DEFAULT_TIMEOUT);
         emitterRepository.save(userId, sseEmitter);
         sseEmitter.onCompletion(() -> emitterRepository.delete(userId));
         sseEmitter.onTimeout(() -> emitterRepository.delete(userId));
