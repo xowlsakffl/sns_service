@@ -1,7 +1,5 @@
 ﻿# SNS Service 웹 솔루션 API
 
-![SNS Service 사용자 화면](https://dummyimage.com/1200x630/0f172a/ffffff&text=SNS+Service+API)
-
 SNS Service는 게시글 기반 소셜 피드와 알림 기능을 제공하는 Spring Boot API 서버입니다. 회원가입/로그인, JWT 인증, 게시글/댓글/좋아요, SSE 알림, 신고/블라인드 처리 흐름을 담당합니다.
 
 포트폴리오 관점에서 핵심은 단순 CRUD를 넘어, 인증/인가 기반 쓰기 API 보호, 실시간 알림(SSE), 신고 누적 자동 블라인드, 관리자 신고 처리(승인/반려), 필터 검색 및 대시보드 집계까지 운영형 기능을 백엔드 중심으로 구현한 점입니다.
