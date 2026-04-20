@@ -1,155 +1,117 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-import * as React from 'react';
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-
-// @mui material components
-import Grid from '@mui/material/Grid';
-import Card from '@mui/material/Card';
-
-// Material Dashboard 2 React components
-import MDBox from 'components/MDBox';
-import MDTypography from 'components/MDTypography';
-import MDInput from 'components/MDInput';
-import MDButton from 'components/MDButton';
-
-// Material Dashboard 2 React example components
-import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
-import DashboardNavbar from 'examples/Navbars/DashboardNavbar';
-import Footer from 'examples/Footer';
-import DataTable from 'examples/Tables/DataTable';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Slide from '@mui/material/Slide';
-
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>,
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+
+import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
 
 function ModifyPost() {
+  const navigate = useNavigate();
   const { state } = useLocation();
-  console.log(state);
-  const [title, setTitle] = useState(state.title);
-  const [body, setBody] = useState(state.body);
-  const [id, setId] = useState(state.id);
-  const [open, setOpen] = React.useState(false);
-  const [dialogTitle, setDialogTitle] = React.useState('');
-  const [dialogMessage, setDialogMessage] = React.useState('');
+  const token = localStorage.getItem('token') || '';
 
-  const handleClickOpen = () => {
-    setOpen(true);
+  const [title, setTitle] = useState(state?.title || '');
+  const [body, setBody] = useState(state?.body || '');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
+
+  const postId = state?.id;
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!postId) {
+      setMessage({ type: 'error', text: '수정할 글 정보를 찾을 수 없습니다.' });
+      return;
+    }
+
+    if (!title.trim() || !body.trim()) {
+      setMessage({ type: 'error', text: '제목과 본문을 모두 입력해주세요.' });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setMessage({ type: '', text: '' });
+
+      await axios.put(
+        `/api/v1/posts/${postId}`,
+        { title: title.trim(), body: body.trim() },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      setMessage({ type: 'success', text: '게시글이 수정되었습니다.' });
+      setTimeout(() => navigate('/my-post'), 500);
+    } catch (error) {
+      const apiMessage = error?.response?.data?.resultMessage;
+      setMessage({ type: 'error', text: apiMessage || '수정에 실패했습니다.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleModifyPost = (event) => {
-    console.log(localStorage.getItem('token'));
-    console.log('title : ' + title);
-    console.log('body : ' + body);
-    console.log('id : ' + id);
-
-    axios({
-      url: '/api/v1/posts/' + id,
-      method: 'PUT',
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token'),
-      },
-      data: {
-        title: title,
-        body: body,
-      },
-    })
-      .then((res) => {
-        setDialogTitle('success');
-        setOpen(true);
-        console.log('success');
-      })
-      .catch((error) => {
-        setDialogTitle(error.response.data.resultCode);
-        setDialogMessage(error.response.data.resultMessage);
-        setOpen(true);
-
-        console.log(error);
-      });
-  };
+  if (!postId) {
+    return (
+      <DashboardLayout>
+        <Box className="gh-page">
+          <Alert severity="warning">수정할 글 정보가 없습니다. 내 글에서 다시 선택해주세요.</Alert>
+          <Button sx={{ mt: 2 }} variant="contained" onClick={() => navigate('/my-post')}>
+            내 글로 이동
+          </Button>
+        </Box>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
-      <MDBox pt={6} pb={3}>
-        <Card>
-          <MDBox pt={4} pb={3} px={3}>
-            <MDBox component="form" role="form">
-              <MDBox mb={2}>
-                <MDInput
-                  label="Title"
-                  defaultValue={title}
-                  onChange={(v) => setTitle(v.target.value)}
-                  fullWidth
-                />
-              </MDBox>
-              <MDBox mb={2}>
-                <MDInput
-                  label="Body"
-                  defaultValue={body}
-                  multiline
-                  rows={20}
-                  onChange={(v) => setBody(v.target.value)}
-                  fullWidth
-                />
-              </MDBox>
-              <MDBox mt={4} mb={1} right>
-                <MDButton onClick={handleModifyPost} variant="gradient" color="info">
-                  Update
-                </MDButton>
-              </MDBox>
-            </MDBox>
-          </MDBox>
-          <Dialog
-            open={open}
-            TransitionComponent={Transition}
-            keepMounted
-            onClose={handleClose}
-            aria-describedby="alert-dialog-slide-description"
-          >
-            <DialogTitle>{dialogTitle}</DialogTitle>
-            <DialogContent>
-              <DialogContentText id="alert-dialog-slide-description">
-                {dialogMessage}
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleClose}>OK</Button>
-            </DialogActions>
-          </Dialog>
+      <Box className="gh-page">
+        <Card className="gh-card" elevation={0}>
+          <CardContent sx={{ p: { xs: 2.4, sm: 3.2 } }}>
+            <Stack spacing={2.2}>
+              <Typography variant="h4" fontWeight={700}>
+                게시글 수정
+              </Typography>
+              {message.text && <Alert severity={message.type || 'info'}>{message.text}</Alert>}
+
+              <Box component="form" onSubmit={handleSubmit}>
+                <Stack spacing={2}>
+                  <TextField
+                    label="제목"
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                    fullWidth
+                  />
+                  <TextField
+                    label="본문"
+                    value={body}
+                    onChange={(event) => setBody(event.target.value)}
+                    multiline
+                    minRows={10}
+                    fullWidth
+                  />
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.2}>
+                    <Button type="submit" variant="contained" disabled={loading}>
+                      {loading ? '저장 중...' : '수정 저장'}
+                    </Button>
+                    <Button variant="outlined" onClick={() => navigate('/my-post')}>
+                      취소
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Box>
+            </Stack>
+          </CardContent>
         </Card>
-      </MDBox>
+      </Box>
     </DashboardLayout>
   );
 }

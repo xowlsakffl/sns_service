@@ -1,180 +1,108 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 import { useState } from 'react';
-import * as React from 'react';
-// react-router-dom components
-import { Link } from 'react-router-dom';
-
-// @mui material components
-import Card from '@mui/material/Card';
-import Checkbox from '@mui/material/Checkbox';
-import Grid from '@mui/material/Grid';
-import { TransitionProps } from '@mui/material/transitions';
-
-// Material Dashboard 2 React components
-import MDBox from 'components/MDBox';
-import MDTypography from 'components/MDTypography';
-import MDInput from 'components/MDInput';
-import MDButton from 'components/MDButton';
-
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Slide from '@mui/material/Slide';
-
-// Authentication layout components
-import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>,
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 
-function Cover() {
+import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
+
+function SignUp() {
+  const navigate = useNavigate();
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
-  const [open, setOpen] = React.useState(false);
-  const [dialogTitle, setDialogTitle] = React.useState('');
-  const [dialogMessage, setDialogMessage] = React.useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-  const handleClose = () => {
-    setOpen(false);
-  };
+    if (userName.trim().length < 2) {
+      setMessage({ type: 'error', text: '아이디는 2자 이상 입력해주세요.' });
+      return;
+    }
 
-  const handleSignUp = (event) => {
-    console.log(userName);
-    console.log(password);
+    if (password.length < 8) {
+      setMessage({ type: 'error', text: '비밀번호는 8자 이상이어야 합니다.' });
+      return;
+    }
 
-    axios({
-      url: '/api/v1/users/join',
-      method: 'POST',
-      data: {
-        name: userName,
-        password: password,
-      },
-    })
-      .then((res) => {
-        setDialogTitle('success');
-        setOpen(true);
-        console.log('success');
-      })
-      .catch((error) => {
-        setDialogTitle(error.response.data.resultCode);
-        setDialogMessage(error.response.data.resultMessage);
-        setOpen(true);
-        console.log(error);
+    try {
+      setLoading(true);
+      setMessage({ type: '', text: '' });
+
+      await axios.post('/api/v1/users/join', {
+        name: userName.trim(),
+        password,
       });
+
+      setMessage({ type: 'success', text: '회원가입 완료. 로그인 페이지로 이동합니다.' });
+      setTimeout(() => navigate('/authentication/sign-in'), 700);
+    } catch (error) {
+      const apiMessage = error?.response?.data?.resultMessage;
+      setMessage({ type: 'error', text: apiMessage || '회원가입에 실패했습니다.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <DashboardLayout>
-      <MDBox mt={30} mb={3}>
-        <Grid container spacing={3} justifyContent="center">
-          <Grid item xs={12} lg={8}>
-            <Card>
-              <MDBox
-                variant="gradient"
-                bgColor="info"
-                borderRadius="lg"
-                coloredShadow="success"
-                mx={2}
-                mt={-3}
-                p={2}
-                mb={1}
-                textAlign="center"
-              >
-                <MDTypography variant="h4" fontWeight="medium" color="white" mt={1}>
-                  Sign Up
-                </MDTypography>
-              </MDBox>
-              <MDBox pt={4} pb={3} px={3}>
-                <MDBox component="form" role="form">
-                  <MDBox mb={2}>
-                    <MDInput
-                      type="userName"
-                      label="User Name"
-                      onChange={(v) => setUserName(v.target.value)}
-                      fullWidth
-                    />
-                  </MDBox>
-                  <MDBox mb={2}>
-                    <MDInput
-                      type="password"
-                      label="Password"
-                      onChange={(v) => setPassword(v.target.value)}
-                      fullWidth
-                    />
-                  </MDBox>
-                  <MDBox mt={4} mb={1}>
-                    <MDButton onClick={handleSignUp} variant="gradient" color="info" fullWidth>
-                      sign up
-                    </MDButton>
-                  </MDBox>
-                  <MDBox mt={3} mb={1} textAlign="center">
-                    <MDTypography variant="button" color="text">
-                      Already have an account?{' '}
-                      <MDTypography
-                        component={Link}
-                        to="/authentication/sign-in"
-                        variant="button"
-                        color="info"
-                        fontWeight="medium"
-                        textGradient
-                      >
-                        Sign In
-                      </MDTypography>
-                    </MDTypography>
-                  </MDBox>
-                </MDBox>
-              </MDBox>
-              <Dialog
-                open={open}
-                TransitionComponent={Transition}
-                keepMounted
-                onClose={handleClose}
-                aria-describedby="alert-dialog-slide-description"
-              >
-                <DialogTitle>{dialogTitle}</DialogTitle>
-                <DialogContent>
-                  <DialogContentText id="alert-dialog-slide-description">
-                    {dialogMessage}
-                  </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleClose}>OK</Button>
-                </DialogActions>
-              </Dialog>
-            </Card>
-          </Grid>
-        </Grid>
-      </MDBox>
+      <Box className="gh-page gh-auth-wrap">
+        <Card className="gh-auth-card" elevation={0}>
+          <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
+            <Stack spacing={2.5}>
+              <Chip label="Ready to Match" className="gh-pill" />
+              <Typography variant="h3" fontWeight={700}>
+                회원가입
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                게임 허브 계정을 만들고 바로 피드에 참여하세요.
+              </Typography>
+
+              {message.text && <Alert severity={message.type || 'info'}>{message.text}</Alert>}
+
+              <Box component="form" onSubmit={handleSubmit}>
+                <Stack spacing={2}>
+                  <TextField
+                    label="아이디"
+                    value={userName}
+                    onChange={(event) => setUserName(event.target.value)}
+                    fullWidth
+                    autoComplete="username"
+                  />
+                  <TextField
+                    label="비밀번호 (8자 이상)"
+                    type="password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    fullWidth
+                    autoComplete="new-password"
+                  />
+                  <Button type="submit" variant="contained" size="large" disabled={loading}>
+                    {loading ? '가입 중...' : '회원가입'}
+                  </Button>
+                  <Typography variant="body2" color="text.secondary">
+                    이미 계정이 있으면{' '}
+                    <RouterLink to="/authentication/sign-in" className="gh-inline-link">
+                      로그인
+                    </RouterLink>
+                  </Typography>
+                </Stack>
+              </Box>
+            </Stack>
+          </CardContent>
+        </Card>
+      </Box>
     </DashboardLayout>
   );
 }
 
-export default Cover;
+export default SignUp;

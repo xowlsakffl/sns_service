@@ -1,184 +1,142 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router';
-
-// @mui material components
-import Grid from '@mui/material/Grid';
-import Card from '@mui/material/Card';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-
-// Material Dashboard 2 React components
-import MDBox from 'components/MDBox';
-import MDTypography from 'components/MDTypography';
-import MDInput from 'components/MDInput';
-import MDButton from 'components/MDButton';
-import MDPagination from 'components/MDPagination';
-
-// Material Dashboard 2 React example components
-import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
-import DashboardNavbar from 'examples/Navbars/DashboardNavbar';
-import Footer from 'examples/Footer';
-import DataTable from 'examples/Tables/DataTable';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Slide from '@mui/material/Slide';
-
-// Data
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>,
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import Chip from '@mui/material/Chip';
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+
+import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
 
 function Feed() {
-  const [page, setPage] = useState(0);
-  const [render, setRender] = useState(false);
-  const [posts, setPosts] = useState([]);
-  const [totalPage, setTotalPage] = useState(0);
-
-  const [title, setTitle] = useState('');
-  const [body, setBody] = useState('');
-  const [open, setOpen] = React.useState(false);
-  const [dialogTitle, setDialogTitle] = React.useState('');
-  const [dialogMessage, setDialogMessage] = React.useState('');
   const navigate = useNavigate();
+  const token = localStorage.getItem('token') || '';
 
-  const handleDetail = (post) => {
-    console.log('handleDetail');
-    console.log(post);
-    navigate('/post-detail', { state: post });
-  };
+  const [posts, setPosts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+  const hasToken = useMemo(() => Boolean(token), [token]);
 
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const fetchPosts = async (nextPage = 1) => {
+    if (!hasToken) {
+      setErrorMessage('로그인이 필요합니다.');
+      return;
+    }
 
-  const changePage = (pageNum) => {
-    console.log('change pages');
-    console.log(pageNum);
-    console.log(page);
-    setPage(pageNum);
-    handleGetPosts(pageNum);
-  };
-
-  const handleGetPosts = (pageNum, event) => {
-    console.log('handleGetPosts');
-    axios({
-      url: '/api/v1/posts?size=5&sort=id&page=' + pageNum,
-      method: 'GET',
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token'),
-      },
-    })
-      .then((res) => {
-        console.log('success');
-        console.log(res);
-        setPosts(res.data.result.content);
-        setTotalPage(res.data.result.totalPages);
-      })
-      .catch((error) => {
-        console.log(error);
-        navigate('/authentication/sign-in');
+    try {
+      setLoading(true);
+      setErrorMessage('');
+      const response = await axios.get(`/api/v1/posts?size=6&sort=id,desc&page=${nextPage - 1}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+
+      const pageInfo = response?.data?.result;
+      setPosts(pageInfo?.content || []);
+      setTotalPages(Math.max(1, pageInfo?.totalPages || 1));
+    } catch (error) {
+      if (error?.response?.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/authentication/sign-in');
+        return;
+      }
+
+      const apiMessage = error?.response?.data?.resultMessage;
+      setErrorMessage(apiMessage || '피드를 불러오지 못했습니다.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    handleGetPosts();
-  }, []);
+    fetchPosts(page);
+  }, [page]);
 
   return (
     <DashboardLayout>
-      <MDBox pt={3} pb={3}>
-        {posts.map((post) => (
-          <MDBox pt={2} pb={2} px={3}>
-            <Card>
-              <MDBox pt={2} pb={2} px={3}>
-                <Grid container>
-                  <Grid item xs={6}>
-                    <MDTypography fontWeight="bold" variant="body2">
-                      {post.title}
-                    </MDTypography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <MDTypography variant="body2" textAlign="right">
-                      {post.user.userName}
-                    </MDTypography>
-                  </Grid>
-                </Grid>
-                <MDTypography variant="body2">{post.body}</MDTypography>
-                <Grid container>
-                  <Grid item xs={11}></Grid>
-                  <Grid item xs={1}>
-                    <Button onClick={() => handleDetail(post)}>Detail</Button>
-                  </Grid>
-                </Grid>
-              </MDBox>
-            </Card>
-          </MDBox>
-        ))}
+      <Box className="gh-page">
+        <Box className="gh-hero">
+          <Typography variant="h3" fontWeight={700}>
+            매칭 피드
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            실시간 모집 글을 확인하고 바로 파티에 합류하세요.
+          </Typography>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.2} sx={{ mt: 2 }}>
+            <Button variant="contained" onClick={() => navigate('/post')}>
+              글 작성
+            </Button>
+            <Button variant="outlined" onClick={() => navigate('/my-post')}>
+              내 글 관리
+            </Button>
+          </Stack>
+        </Box>
 
-        <Dialog
-          open={open}
-          TransitionComponent={Transition}
-          keepMounted
-          onClose={handleClose}
-          aria-describedby="alert-dialog-slide-description"
-        >
-          <DialogTitle>{dialogTitle}</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-slide-description">
-              {dialogMessage}
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>OK</Button>
-          </DialogActions>
-        </Dialog>
-      </MDBox>
+        {!hasToken && (
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            로그인 후 피드를 확인할 수 있습니다.
+          </Alert>
+        )}
+        {errorMessage && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {errorMessage}
+          </Alert>
+        )}
 
-      <MDPagination>
-        <MDPagination item>
-          <KeyboardArrowLeftIcon></KeyboardArrowLeftIcon>
-        </MDPagination>
-        {[...Array(totalPage).keys()].map((i) => (
-          <MDPagination item onClick={() => changePage(i)}>
-            {i + 1}
-          </MDPagination>
-        ))}
-        <MDPagination item>
-          <KeyboardArrowRightIcon></KeyboardArrowRightIcon>
-        </MDPagination>
-      </MDPagination>
+        <Stack spacing={2} sx={{ mt: 2.5 }}>
+          {posts.map((post) => {
+            const writer = post?.user?.userName || post?.user?.name || 'unknown';
+            return (
+              <Card key={post.id} className="gh-card" elevation={0}>
+                <CardContent>
+                  <Stack spacing={1.2}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Typography variant="h5" fontWeight={700}>
+                        {post.title}
+                      </Typography>
+                      <Chip label={writer} size="small" />
+                    </Stack>
+                    <Typography className="gh-body-clamp" color="text.secondary">
+                      {post.body}
+                    </Typography>
+                  </Stack>
+                </CardContent>
+                <CardActions>
+                  <Button size="small" onClick={() => navigate('/post-detail', { state: post })}>
+                    상세 보기
+                  </Button>
+                </CardActions>
+              </Card>
+            );
+          })}
+        </Stack>
+
+        {!loading && posts.length === 0 && hasToken && (
+          <Alert severity="info" sx={{ mt: 2 }}>
+            아직 등록된 글이 없습니다. 첫 글을 작성해보세요.
+          </Alert>
+        )}
+
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+          <Pagination
+            color="primary"
+            page={page}
+            count={totalPages}
+            onChange={(event, nextPage) => setPage(nextPage)}
+          />
+        </Box>
+      </Box>
     </DashboardLayout>
   );
 }

@@ -1,160 +1,132 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router';
-
-// @mui material components
-import Grid from '@mui/material/Grid';
-import Card from '@mui/material/Card';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-
-// Material Dashboard 2 React components
-import MDBox from 'components/MDBox';
-import MDTypography from 'components/MDTypography';
-import MDInput from 'components/MDInput';
-import MDButton from 'components/MDButton';
-import MDPagination from 'components/MDPagination';
-
-// Material Dashboard 2 React example components
-import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
-import DashboardNavbar from 'examples/Navbars/DashboardNavbar';
-import Footer from 'examples/Footer';
-import DataTable from 'examples/Tables/DataTable';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Slide from '@mui/material/Slide';
-
-// Data
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Chip from '@mui/material/Chip';
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>,
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
 
 function Alarm() {
-  const [page, setPage] = useState(0);
-  const [render, setRender] = useState(false);
-  const [alarms, setAlarms] = useState([]);
-  const [totalPage, setTotalPage] = useState(0);
-  const [alarmEvent, setAlarmEvent] = useState(undefined);
-
   const navigate = useNavigate();
-  let eventSource = undefined;
+  const token = localStorage.getItem('token') || '';
+  const eventSourceRef = useRef(null);
 
-  const changePage = (pageNum) => {
-    console.log('change pages');
-    console.log(pageNum);
-    console.log(page);
-    setPage(pageNum);
-    handleGetAlarm(pageNum);
-  };
+  const [alarms, setAlarms] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [message, setMessage] = useState({ type: '', text: '' });
 
-  const handleGetAlarm = (pageNum, event) => {
-    console.log('handleGetAlarm');
-    axios({
-      url: '/api/v1/users/alarm?size=5&sort=id,desc&page=' + pageNum,
-      method: 'GET',
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token'),
-      },
-    })
-      .then((res) => {
-        console.log('success');
-        console.log(res);
-        setAlarms(res.data.result.content);
-        setTotalPage(res.data.result.totalPages);
-      })
-      .catch((error) => {
-        console.log(error);
+  const fetchAlarms = async (nextPage = 1) => {
+    try {
+      const response = await axios.get(
+        `/api/v1/users/alarm?size=6&sort=id,desc&page=${nextPage - 1}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      const pageInfo = response?.data?.result;
+      setAlarms(pageInfo?.content || []);
+      setTotalPages(Math.max(1, pageInfo?.totalPages || 1));
+    } catch (error) {
+      if (error?.response?.status === 401) {
+        localStorage.removeItem('token');
         navigate('/authentication/sign-in');
-      });
+        return;
+      }
+
+      const apiMessage = error?.response?.data?.resultMessage;
+      setMessage({ type: 'error', text: apiMessage || '알림을 불러오지 못했습니다.' });
+    }
   };
 
   useEffect(() => {
-    handleGetAlarm();
+    if (!token) {
+      navigate('/authentication/sign-in');
+      return;
+    }
 
-    eventSource = new EventSource("http://localhost:8080/api/v1/users/alarm/subscribe?token=" + localStorage.getItem('token'));
+    fetchAlarms(page);
+  }, [page]);
 
-    setAlarmEvent(eventSource);
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
 
-    eventSource.addEventListener("open", function (event) {
-      console.log("connection opened");
+    const source = new EventSource(
+      `http://localhost:8080/api/v1/users/alarm/subscribe?token=${token}`,
+    );
+    eventSourceRef.current = source;
+
+    source.addEventListener('alarm', () => {
+      fetchAlarms(page);
     });
 
-    eventSource.addEventListener("alarm", function (event) {
-       console.log(event.data);
-       handleGetAlarm();
+    source.addEventListener('error', () => {
+      source.close();
     });
 
-    eventSource.addEventListener("error", function (event) {
-      console.log(event.target.readyState);
-      if (event.target.readyState === EventSource.CLOSED) {
-        console.log("eventsource closed (" + event.target.readyState + ")");
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
       }
-      eventSource.close();
-    });
-
-  }, []);
+    };
+  }, [token, page]);
 
   return (
     <DashboardLayout>
-      <MDBox pt={3} pb={3}>
-        {alarms.map((alarm) => (
-          <MDBox pt={2} pb={2} px={3}>
-            <Card>
-              <MDBox pt={2} pb={2} px={3}>
-                <Grid container>
-                  <Grid item xs={12}>
-                    <MDTypography fontWeight="bold" variant="body2">
-                      {alarm.text}
-                    </MDTypography>
-                  </Grid>
-                  </Grid>
-              </MDBox>
-            </Card>
-          </MDBox>
-        ))}
-      </MDBox>
+      <Box className="gh-page">
+        <Box className="gh-hero">
+          <Typography variant="h4" fontWeight={700}>
+            실시간 알림
+          </Typography>
+          <Typography color="text.secondary">
+            댓글, 좋아요 등 이벤트 알림을 최신순으로 확인합니다.
+          </Typography>
+        </Box>
 
-      <MDPagination>
-        <MDPagination item>
-          <KeyboardArrowLeftIcon></KeyboardArrowLeftIcon>
-        </MDPagination>
-        {[...Array(totalPage).keys()].map((i) => (
-          <MDPagination item onClick={() => changePage(i)}>
-            {i + 1}
-          </MDPagination>
-        ))}
-        <MDPagination item>
-          <KeyboardArrowRightIcon></KeyboardArrowRightIcon>
-        </MDPagination>
-      </MDPagination>
+        {message.text && (
+          <Alert severity={message.type || 'info'} sx={{ mt: 2 }}>
+            {message.text}
+          </Alert>
+        )}
+
+        <Stack spacing={1.6} sx={{ mt: 2.4 }}>
+          {alarms.map((alarm) => (
+            <Card key={alarm.id || alarm.text} className="gh-card" elevation={0}>
+              <CardContent>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography>{alarm.text}</Typography>
+                  <Chip label="NEW" size="small" color="info" />
+                </Stack>
+              </CardContent>
+            </Card>
+          ))}
+        </Stack>
+
+        {alarms.length === 0 && (
+          <Alert severity="info" sx={{ mt: 2 }}>
+            새로운 알림이 없습니다.
+          </Alert>
+        )}
+
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+          <Pagination
+            page={page}
+            count={totalPages}
+            onChange={(event, nextPage) => setPage(nextPage)}
+            color="primary"
+          />
+        </Box>
+      </Box>
     </DashboardLayout>
   );
 }

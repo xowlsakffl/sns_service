@@ -1,242 +1,229 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-
-// @mui material components
-import Grid from '@mui/material/Grid';
-import Card from '@mui/material/Card';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-
-// Material Dashboard 2 React components
-import MDBox from 'components/MDBox';
-import MDTypography from 'components/MDTypography';
-import MDInput from 'components/MDInput';
-import MDButton from 'components/MDButton';
-import MDPagination from 'components/MDPagination';
-
-// Material Dashboard 2 React example components
-import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
-import DashboardNavbar from 'examples/Navbars/DashboardNavbar';
-import Footer from 'examples/Footer';
-import DataTable from 'examples/Tables/DataTable';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Slide from '@mui/material/Slide';
-
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>,
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Chip from '@mui/material/Chip';
+import Divider from '@mui/material/Divider';
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+
+import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
 
 function PostDetail() {
+  const navigate = useNavigate();
   const { state } = useLocation();
-  console.log(state);
-  const [page, setPage] = useState(0);
-  const [title, setTitle] = useState(state.title);
-  const [writer, setWriter] = useState(state.user.userName);
-  const [body, setBody] = useState(state.body);
-  const [id, setId] = useState(state.id);
+  const token = localStorage.getItem('token') || '';
+
+  const postId = state?.id;
+  const title = state?.title || '';
+  const writer = state?.user?.userName || state?.user?.name || 'unknown';
+  const body = state?.body || '';
 
   const [likes, setLikes] = useState(0);
   const [comments, setComments] = useState([]);
-  const [totalPage, setTotalPage] = useState(0);
-  const [comment, setComment] = useState();
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [comment, setComment] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
 
-  const handleLikePost = (event) => {
-    console.log(localStorage.getItem('token'));
-    axios({
-      url: '/api/v1/posts/' + id + '/likes',
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token'),
-      },
-    })
-      .then((res) => {
-        console.log('success');
-        handleLikeCounts();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  const canRequest = useMemo(() => Boolean(token && postId), [token, postId]);
+
+  const fetchLikes = async () => {
+    if (!canRequest) {
+      return;
+    }
+
+    const response = await axios.get(`/api/v1/posts/${postId}/likes`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setLikes(response?.data?.result || 0);
   };
 
-  const handleLikeCounts = (event) => {
-    console.log(localStorage.getItem('token'));
-    axios({
-      url: '/api/v1/posts/' + id + '/likes',
-      method: 'GET',
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token'),
-      },
-    })
-      .then((res) => {
-        console.log('success');
-        setLikes(res.data.result);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
+  const fetchComments = async (nextPage = 1) => {
+    if (!canRequest) {
+      return;
+    }
 
-  const changePage = (pageNum) => {
-    console.log('change pages');
-    console.log(pageNum);
-    console.log(page);
-    setPage(pageNum);
-    handleGetComments(pageNum);
-  };
+    const response = await axios.get(
+      `/api/v1/posts/${postId}/comments?size=5&sort=id,desc&page=${nextPage - 1}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
 
-  const handleGetComments = (pageNum, event) => {
-    console.log('handleGetComments');
-    axios({
-      url: '/api/v1/posts/' + id + '/comments?size=5&sort=id&page=' + pageNum,
-      method: 'GET',
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token'),
-      },
-    })
-      .then((res) => {
-        console.log('success');
-        console.log(res);
-        setComments(res.data.result.content);
-        setTotalPage(res.data.result.totalPages);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  const handleWriteComment = (pageNum, event) => {
-    console.log('handleWriteComment');
-    axios({
-      url: '/api/v1/posts/' + id + '/comments',
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token'),
-      },
-      data: {
-        comment: comment,
-      },
-    })
-      .then((res) => {
-        console.log('success');
-        handleGetComments();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const pageInfo = response?.data?.result;
+    setComments(pageInfo?.content || []);
+    setTotalPages(Math.max(1, pageInfo?.totalPages || 1));
   };
 
   useEffect(() => {
-    handleGetComments();
-    handleLikeCounts();
-  }, '');
+    if (!postId) {
+      return;
+    }
+
+    const boot = async () => {
+      try {
+        setLoading(true);
+        await Promise.all([fetchLikes(), fetchComments(page)]);
+      } catch (error) {
+        if (error?.response?.status === 401) {
+          localStorage.removeItem('token');
+          navigate('/authentication/sign-in');
+          return;
+        }
+
+        const apiMessage = error?.response?.data?.resultMessage;
+        setMessage({ type: 'error', text: apiMessage || '상세 정보를 불러오지 못했습니다.' });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    boot();
+  }, [postId, page]);
+
+  const handleLike = async () => {
+    if (!canRequest) {
+      return;
+    }
+
+    try {
+      await axios.post(
+        `/api/v1/posts/${postId}/likes`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      await fetchLikes();
+    } catch (error) {
+      const apiMessage = error?.response?.data?.resultMessage;
+      setMessage({ type: 'error', text: apiMessage || '좋아요 처리에 실패했습니다.' });
+    }
+  };
+
+  const handleWriteComment = async (event) => {
+    event.preventDefault();
+
+    if (!comment.trim()) {
+      setMessage({ type: 'error', text: '댓글 내용을 입력해주세요.' });
+      return;
+    }
+
+    try {
+      await axios.post(
+        `/api/v1/posts/${postId}/comments`,
+        { comment: comment.trim() },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      setComment('');
+      setMessage({ type: 'success', text: '댓글이 등록되었습니다.' });
+      setPage(1);
+      await fetchComments(1);
+    } catch (error) {
+      const apiMessage = error?.response?.data?.resultMessage;
+      setMessage({ type: 'error', text: apiMessage || '댓글 등록에 실패했습니다.' });
+    }
+  };
+
+  if (!postId) {
+    return (
+      <DashboardLayout>
+        <Box className="gh-page">
+          <Alert severity="warning">상세 글 정보가 없습니다. 피드에서 다시 진입해주세요.</Alert>
+          <Button sx={{ mt: 2 }} variant="contained" onClick={() => navigate('/feed')}>
+            피드로 이동
+          </Button>
+        </Box>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
-      <MDBox pt={6} pb={3}>
-        <Card>
-          <MDBox pt={4} pb={3} px={3}>
-            <Grid container>
-              <Grid item xs={6}>
-                <MDTypography fontWeight="bold" variant="body2">
+      <Box className="gh-page">
+        <Card className="gh-card" elevation={0}>
+          <CardContent sx={{ p: { xs: 2.4, sm: 3.2 } }}>
+            <Stack spacing={2}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="h4" fontWeight={700}>
                   {title}
-                </MDTypography>
-              </Grid>
-              <Grid item xs={6}>
-                <MDTypography variant="body2" textAlign="right">
-                  {writer}
-                </MDTypography>
-              </Grid>
-            </Grid>
-            <MDTypography variant="body2">{body}</MDTypography>
-            <MDTypography variant="body2">{likes} LIKES</MDTypography>
-          </MDBox>
+                </Typography>
+                <Chip label={writer} />
+              </Stack>
+              <Typography color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>
+                {body}
+              </Typography>
+              <Stack direction="row" spacing={1.2} alignItems="center">
+                <Button variant="contained" onClick={handleLike}>
+                  좋아요
+                </Button>
+                <Chip color="info" label={`좋아요 ${likes}`} />
+              </Stack>
+            </Stack>
+          </CardContent>
         </Card>
-      </MDBox>
 
-      <MDButton onClick={handleLikePost} variant="gradient" color="info">
-        LIKE
-      </MDButton>
+        {message.text && (
+          <Alert severity={message.type || 'info'} sx={{ mt: 2 }}>
+            {message.text}
+          </Alert>
+        )}
 
+        <Card className="gh-card" elevation={0} sx={{ mt: 2 }}>
+          <CardContent>
+            <Typography variant="h6" fontWeight={700}>
+              댓글
+            </Typography>
+            <Stack spacing={1.2} sx={{ mt: 1.5 }}>
+              {comments.map((item) => (
+                <Box key={item.id || `${item.userName}-${item.comment}`}>
+                  <Typography fontWeight={600}>
+                    {item.userName || item.user?.userName || 'unknown'}
+                  </Typography>
+                  <Typography color="text.secondary">{item.comment || ''}</Typography>
+                  <Divider sx={{ mt: 1.1 }} />
+                </Box>
+              ))}
+              {!loading && comments.length === 0 && (
+                <Alert severity="info">등록된 댓글이 없습니다.</Alert>
+              )}
+            </Stack>
 
+            <Box component="form" onSubmit={handleWriteComment} sx={{ mt: 2.2 }}>
+              <Stack spacing={1.2}>
+                <TextField
+                  label="댓글 입력"
+                  value={comment}
+                  onChange={(event) => setComment(event.target.value)}
+                  multiline
+                  minRows={2}
+                  fullWidth
+                />
+                <Button type="submit" variant="contained" sx={{ alignSelf: 'flex-start' }}>
+                  댓글 등록
+                </Button>
+              </Stack>
+            </Box>
 
-          {comments.map((comment) => (
-            <MDBox pt={2} pb={2}>
-              <Card>
-                <MDBox pt={2} pb={2} px={3}>
-                  <Grid container>
-                    <Grid item xs={6}>
-                      <MDTypography fontWeight="bold" variant="body2">
-                        {comment.comment}
-                      </MDTypography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <MDTypography variant="body2" textAlign="right">
-                        {comment.userName}
-                      </MDTypography>
-                    </Grid>
-                  </Grid>
-                  <MDTypography variant="body2">{comment.body}</MDTypography>
-                </MDBox>
-              </Card>
-            </MDBox>
-          ))}
-          <MDPagination>
-            <MDPagination item>
-              <KeyboardArrowLeftIcon></KeyboardArrowLeftIcon>
-            </MDPagination>
-            {[...Array(totalPage).keys()].map((i) => (
-              <MDPagination item onClick={() => changePage(i)}>
-                {i + 1}
-              </MDPagination>
-            ))}
-            <MDPagination item>
-              <KeyboardArrowRightIcon></KeyboardArrowRightIcon>
-            </MDPagination>
-          </MDPagination>
-
-
-      <MDBox pt={3} pb={3}>
-        <Card>
-          <MDBox component="form" role="form">
-            <MDBox pt={2} pb={2} px={3}>
-              <MDInput label="comment" onChange={(v) => setComment(v.target.value)} fullWidth />
-            </MDBox>
-            <MDBox pt={2} pb={2} px={3} right>
-              <MDButton onClick={handleWriteComment} variant="gradient" color="info">
-                Comment
-              </MDButton>
-            </MDBox>
-          </MDBox>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2.5 }}>
+              <Pagination
+                page={page}
+                count={totalPages}
+                onChange={(event, nextPage) => setPage(nextPage)}
+                color="primary"
+              />
+            </Box>
+          </CardContent>
         </Card>
-      </MDBox>
+      </Box>
     </DashboardLayout>
   );
 }

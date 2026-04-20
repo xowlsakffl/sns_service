@@ -1,145 +1,116 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-import * as React from 'react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-
-// @mui material components
-import Grid from '@mui/material/Grid';
-import Card from '@mui/material/Card';
-
-// Material Dashboard 2 React components
-import MDBox from 'components/MDBox';
-import MDTypography from 'components/MDTypography';
-import MDInput from 'components/MDInput';
-import MDButton from 'components/MDButton';
-
-// Material Dashboard 2 React example components
-import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
-import DashboardNavbar from 'examples/Navbars/DashboardNavbar';
-import Footer from 'examples/Footer';
-import DataTable from 'examples/Tables/DataTable';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Slide from '@mui/material/Slide';
-
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>,
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+
+import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
 
 function Post() {
+  const navigate = useNavigate();
+  const token = localStorage.getItem('token') || '';
+
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
-  const [open, setOpen] = React.useState(false);
-  const [dialogTitle, setDialogTitle] = React.useState('');
-  const [dialogMessage, setDialogMessage] = React.useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-  const handleClose = () => {
-    setOpen(false);
-  };
+    if (!token) {
+      setMessage({ type: 'error', text: '로그인이 필요합니다.' });
+      navigate('/authentication/sign-in');
+      return;
+    }
 
-  const handleWritePost = (event) => {
-    console.log(localStorage.getItem('token'));
-    console.log('title : ' + title);
-    console.log('body : ' + body);
+    if (!title.trim() || !body.trim()) {
+      setMessage({ type: 'error', text: '제목과 본문을 모두 입력해주세요.' });
+      return;
+    }
 
-    axios({
-      url: '/api/v1/posts',
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token'),
-      },
-      data: {
-        title: title,
-        body: body,
-      },
-    })
-      .then((res) => {
-        setDialogTitle('success');
-        setOpen(true);
-        console.log('success');
-      })
-      .catch((error) => {
-        setDialogTitle(error.response.data.resultCode);
-        setDialogMessage(error.response.data.resultMessage);
-        setOpen(true);
+    try {
+      setLoading(true);
+      setMessage({ type: '', text: '' });
 
-        console.log(error);
-      });
+      await axios.post(
+        '/api/v1/posts',
+        { title: title.trim(), body: body.trim() },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      setMessage({ type: 'success', text: '게시글이 등록되었습니다.' });
+      setTimeout(() => navigate('/feed'), 500);
+    } catch (error) {
+      if (error?.response?.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/authentication/sign-in');
+        return;
+      }
+
+      const apiMessage = error?.response?.data?.resultMessage;
+      setMessage({ type: 'error', text: apiMessage || '게시글 등록에 실패했습니다.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <DashboardLayout>
-      <MDBox pt={6} pb={3}>
-        <Card>
-          <MDBox pt={4} pb={3} px={3}>
-            <MDBox component="form" role="form">
-              <MDBox mb={2}>
-                <MDInput label="Title" onChange={(v) => setTitle(v.target.value)} fullWidth />
-              </MDBox>
-              <MDBox mb={2}>
-                <MDInput
-                  label="Body"
-                  multiline
-                  rows={20}
-                  onChange={(v) => setBody(v.target.value)}
-                  fullWidth
-                />
-              </MDBox>
-              <MDBox mt={4} mb={1} right>
-                <MDButton onClick={handleWritePost} variant="gradient" color="info">
-                  Save
-                </MDButton>
-              </MDBox>
-            </MDBox>
-          </MDBox>
-          <Dialog
-            open={open}
-            TransitionComponent={Transition}
-            keepMounted
-            onClose={handleClose}
-            aria-describedby="alert-dialog-slide-description"
-          >
-            <DialogTitle>{dialogTitle}</DialogTitle>
-            <DialogContent>
-              <DialogContentText id="alert-dialog-slide-description">
-                {dialogMessage}
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleClose}>OK</Button>
-            </DialogActions>
-          </Dialog>
+      <Box className="gh-page">
+        <Card className="gh-card" elevation={0}>
+          <CardContent sx={{ p: { xs: 2.4, sm: 3.2 } }}>
+            <Stack spacing={2.2}>
+              <Typography variant="h4" fontWeight={700}>
+                새 글 작성
+              </Typography>
+              <Typography color="text.secondary">
+                게임방 목적, 티어, 마이크 여부 등 핵심 정보를 본문에 적어주세요.
+              </Typography>
+
+              {message.text && <Alert severity={message.type || 'info'}>{message.text}</Alert>}
+
+              <Box component="form" onSubmit={handleSubmit}>
+                <Stack spacing={2}>
+                  <TextField
+                    label="제목"
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                    fullWidth
+                  />
+                  <TextField
+                    label="본문"
+                    value={body}
+                    onChange={(event) => setBody(event.target.value)}
+                    multiline
+                    minRows={10}
+                    fullWidth
+                  />
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.2}>
+                    <Button type="submit" variant="contained" disabled={loading}>
+                      {loading ? '저장 중...' : '등록'}
+                    </Button>
+                    <Button variant="outlined" onClick={() => navigate('/feed')}>
+                      취소
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Box>
+            </Stack>
+          </CardContent>
         </Card>
-      </MDBox>
+      </Box>
     </DashboardLayout>
   );
 }

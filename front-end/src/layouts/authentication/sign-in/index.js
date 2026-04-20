@@ -1,255 +1,128 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 import { useState } from 'react';
-import * as React from 'react';
-
-// react-router-dom components
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router';
-
-// @mui material components
-import Card from '@mui/material/Card';
-import Switch from '@mui/material/Switch';
-import Grid from '@mui/material/Grid';
-import MuiLink from '@mui/material/Link';
-
-// @mui icons
-import FacebookIcon from '@mui/icons-material/Facebook';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import GoogleIcon from '@mui/icons-material/Google';
-import { TransitionProps } from '@mui/material/transitions';
-
-// Material Dashboard 2 React components
-import MDBox from 'components/MDBox';
-import MDTypography from 'components/MDTypography';
-import MDInput from 'components/MDInput';
-import MDButton from 'components/MDButton';
-
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Slide from '@mui/material/Slide';
-
-// Authentication layout components
-import BasicLayout from 'layouts/authentication/components/BasicLayout';
-import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>,
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 
-function Basic() {
+import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
+
+function SignIn() {
+  const navigate = useNavigate();
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
-  const [open, setOpen] = React.useState(false);
-  const [dialogTitle, setDialogTitle] = React.useState('');
-  const [dialogMessage, setDialogMessage] = React.useState('');
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
 
-  const logout = () => {
-    console.log(localStorage.getItem('token'));
-    localStorage.setItem('token', '');
-    navigate('/feed');
-  };
+  const token = localStorage.getItem('token') || '';
+  const isLoggedIn = Boolean(token);
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!userName.trim() || !password.trim()) {
+      setMessage({ type: 'error', text: '아이디와 비밀번호를 입력해주세요.' });
+      return;
+    }
 
-  const handleClose = () => {
-    setOpen(false);
-  };
+    try {
+      setLoading(true);
+      setMessage({ type: '', text: '' });
 
-  const handleSignIn = (event) => {
-    console.log(userName);
-    console.log(password);
-
-    axios({
-      url: '/api/v1/users/login',
-      method: 'POST',
-      data: {
-        name: userName,
-        password: password,
-      },
-    })
-      .then((res) => {
-        console.log('success');
-        setDialogTitle('success');
-        setDialogMessage('');
-        setOpen(true);
-        localStorage.setItem('token', res.data.result.token);
-        console.log(res.data.result.token);
-      })
-      .catch((error) => {
-        setDialogTitle(error.response.data.resultCode);
-        setDialogMessage(error.response.data.resultMessage);
-        setOpen(true);
-        console.log(error);
+      const res = await axios.post('/api/v1/users/login', {
+        name: userName.trim(),
+        password,
       });
+
+      const nextToken = res?.data?.result?.token;
+      if (!nextToken) {
+        throw new Error('토큰이 응답에 없습니다.');
+      }
+
+      localStorage.setItem('token', nextToken);
+      navigate('/feed');
+    } catch (error) {
+      const apiMessage = error?.response?.data?.resultMessage;
+      setMessage({ type: 'error', text: apiMessage || '로그인에 실패했습니다.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (localStorage.getItem('token') == '') {
-    return (
-      <DashboardLayout>
-        <MDBox mt={30} mb={3}>
-          <Grid container spacing={3} justifyContent="center">
-            <Grid item xs={12} lg={8}>
-              <Card>
-                <MDBox
-                  variant="gradient"
-                  bgColor="info"
-                  borderRadius="lg"
-                  coloredShadow="info"
-                  mx={2}
-                  mt={-3}
-                  p={2}
-                  mb={1}
-                  textAlign="center"
-                >
-                  <MDTypography variant="h4" fontWeight="medium" color="white" mt={1}>
-                    Sign in
-                  </MDTypography>
-                </MDBox>
-                <MDBox pt={4} pb={3} px={3}>
-                  <MDBox component="form" role="form">
-                    <MDBox mb={2}>
-                      <MDInput
-                        type="userName"
-                        label="User Name"
-                        onChange={(v) => setUserName(v.target.value)}
-                        fullWidth
-                      />
-                    </MDBox>
-                    <MDBox mb={2}>
-                      <MDInput
-                        type="password"
-                        label="Password"
-                        onChange={(v) => setPassword(v.target.value)}
-                        fullWidth
-                      />
-                    </MDBox>
-                    <MDBox mt={4} mb={1}>
-                      <MDButton onClick={handleSignIn} variant="gradient" color="info" fullWidth>
-                        sign in
-                      </MDButton>
-                    </MDBox>
-                    <MDBox mt={3} mb={1} textAlign="center">
-                      <MDTypography variant="button" color="text">
-                        Don&apos;t have an account?{' '}
-                        <MDTypography
-                          component={Link}
-                          to="/authentication/sign-up"
-                          variant="button"
-                          color="info"
-                          fontWeight="medium"
-                          textGradient
-                        >
-                          Sign Up
-                        </MDTypography>
-                      </MDTypography>
-                    </MDBox>
-                  </MDBox>
-                </MDBox>
-                <Dialog
-                  open={open}
-                  TransitionComponent={Transition}
-                  keepMounted
-                  onClose={handleClose}
-                  aria-describedby="alert-dialog-slide-description"
-                >
-                  <DialogTitle>{dialogTitle}</DialogTitle>
-                  <DialogContent>
-                    <DialogContentText id="alert-dialog-slide-description">
-                      {dialogMessage}
-                    </DialogContentText>
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={handleClose}>OK</Button>
-                  </DialogActions>
-                </Dialog>
-              </Card>
-            </Grid>
-          </Grid>
-        </MDBox>
-      </DashboardLayout>
-    );
-  } else {
-    return (
-      <DashboardLayout>
-        <MDBox mt={30} mb={3}>
-          <Grid container spacing={3} justifyContent="center">
-            <Grid item xs={12} lg={8}>
-              <Card>
-                <MDBox
-                  variant="gradient"
-                  bgColor="info"
-                  borderRadius="lg"
-                  coloredShadow="info"
-                  mx={2}
-                  mt={-3}
-                  p={2}
-                  mb={1}
-                  textAlign="center"
-                >
-                  <MDTypography variant="h4" fontWeight="medium" color="white" mt={1}>
-                    Already login
-                  </MDTypography>
-                </MDBox>
-                <MDBox pt={4} pb={3} px={3}>
-                  <MDBox component="form" role="form">
-                    <MDBox mt={4} mb={1}>
-                      <MDButton onClick={logout} variant="gradient" color="info" fullWidth>
-                        logout
-                      </MDButton>
-                    </MDBox>
-                  </MDBox>
-                </MDBox>
-                <Dialog
-                  open={open}
-                  TransitionComponent={Transition}
-                  keepMounted
-                  onClose={handleClose}
-                  aria-describedby="alert-dialog-slide-description"
-                >
-                  <DialogTitle>{dialogTitle}</DialogTitle>
-                  <DialogContent>
-                    <DialogContentText id="alert-dialog-slide-description">
-                      {dialogMessage}
-                    </DialogContentText>
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={handleClose}>OK</Button>
-                  </DialogActions>
-                </Dialog>
-              </Card>
-            </Grid>
-          </Grid>
-        </MDBox>
-      </DashboardLayout>
-    );
-  }
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setMessage({ type: 'success', text: '로그아웃되었습니다.' });
+    navigate('/authentication/sign-in');
+  };
+
+  return (
+    <DashboardLayout>
+      <Box className="gh-page gh-auth-wrap">
+        <Card className="gh-auth-card" elevation={0}>
+          <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
+            <Stack spacing={2.5}>
+              <Chip label="GameHub SNS" className="gh-pill" />
+              <Typography variant="h3" fontWeight={700}>
+                로그인
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                기본 계정은 없습니다. 회원가입 후 로그인하세요.
+              </Typography>
+
+              {message.text && <Alert severity={message.type || 'info'}>{message.text}</Alert>}
+
+              {isLoggedIn ? (
+                <Stack spacing={2}>
+                  <Alert severity="success">현재 로그인 상태입니다.</Alert>
+                  <Button variant="contained" size="large" onClick={() => navigate('/feed')}>
+                    피드로 이동
+                  </Button>
+                  <Button variant="outlined" color="error" onClick={handleLogout}>
+                    로그아웃
+                  </Button>
+                </Stack>
+              ) : (
+                <Box component="form" onSubmit={handleSubmit}>
+                  <Stack spacing={2}>
+                    <TextField
+                      label="아이디"
+                      value={userName}
+                      onChange={(event) => setUserName(event.target.value)}
+                      fullWidth
+                      autoComplete="username"
+                    />
+                    <TextField
+                      label="비밀번호"
+                      type="password"
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      fullWidth
+                      autoComplete="current-password"
+                    />
+                    <Button type="submit" variant="contained" size="large" disabled={loading}>
+                      {loading ? '로그인 중...' : '로그인'}
+                    </Button>
+                    <Typography variant="body2" color="text.secondary">
+                      계정이 없으면{' '}
+                      <RouterLink to="/authentication/sign-up" className="gh-inline-link">
+                        회원가입
+                      </RouterLink>
+                    </Typography>
+                  </Stack>
+                </Box>
+              )}
+            </Stack>
+          </CardContent>
+        </Card>
+      </Box>
+    </DashboardLayout>
+  );
 }
 
-export default Basic;
+export default SignIn;

@@ -1,215 +1,142 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router';
-
-// @mui material components
-import Grid from '@mui/material/Grid';
-import Card from '@mui/material/Card';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-
-// Material Dashboard 2 React components
-import MDBox from 'components/MDBox';
-import MDTypography from 'components/MDTypography';
-import MDInput from 'components/MDInput';
-import MDButton from 'components/MDButton';
-import MDPagination from 'components/MDPagination';
-
-// Material Dashboard 2 React example components
-import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
-import DashboardNavbar from 'examples/Navbars/DashboardNavbar';
-import Footer from 'examples/Footer';
-import DataTable from 'examples/Tables/DataTable';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Slide from '@mui/material/Slide';
-
-// Data
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>,
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import Chip from '@mui/material/Chip';
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+
+import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
 
 function MyPosts() {
-  const [page, setPage] = useState(0);
-  const [render, setRender] = useState(false);
-  const [posts, setPosts] = useState([]);
-  const [totalPage, setTotalPage] = useState(0);
-
-  const [title, setTitle] = useState('');
-  const [body, setBody] = useState('');
-  const [open, setOpen] = React.useState(false);
-  const [dialogTitle, setDialogTitle] = React.useState('');
-  const [dialogMessage, setDialogMessage] = React.useState('');
   const navigate = useNavigate();
+  const token = localStorage.getItem('token') || '';
 
-  const handleModify = (post) => {
-    console.log('handleModify');
-    console.log(post);
-    navigate('/modify-post', { state: post });
-  };
+  const [posts, setPosts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [message, setMessage] = useState({ type: '', text: '' });
 
-  const handleDetail = (post) => {
-    console.log('handleDetail');
-    console.log(post);
-    navigate('/post-detail', { state: post });
-  };
-
-  const handleDelete = (id) => {
-    console.log('handleDelete ' + id);
-    axios({
-      url: '/api/v1/posts/' + id,
-      method: 'DELETE',
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token'),
-      },
-    })
-      .then((res) => {
-        console.log('success');
-        console.log(res);
-        console.log(page);
-        handleGetPosts(page);
-      })
-      .catch((error) => {
-        console.log(error);
-        navigate('/authentication/sign-in');
+  const fetchPosts = async (nextPage = 1) => {
+    try {
+      const response = await axios.get(`/api/v1/posts/my?size=6&sort=id,desc&page=${nextPage - 1}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-  };
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const changePage = (pageNum) => {
-    console.log('changePage');
-    setPage(pageNum);
-    handleGetPosts(pageNum);
-  };
-
-  const handleGetPosts = (pageNum, event) => {
-    console.log('handleGetPosts');
-    axios({
-      url: '/api/v1/posts/my?size=5&sort=id&page=' + pageNum,
-      method: 'GET',
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token'),
-      },
-    })
-      .then((res) => {
-        console.log('success');
-        console.log(res);
-        setPosts(res.data.result.content);
-        setTotalPage(res.data.result.totalPages);
-      })
-      .catch((error) => {
-        console.log(error);
+      const pageInfo = response?.data?.result;
+      setPosts(pageInfo?.content || []);
+      setTotalPages(Math.max(1, pageInfo?.totalPages || 1));
+    } catch (error) {
+      if (error?.response?.status === 401) {
+        localStorage.removeItem('token');
         navigate('/authentication/sign-in');
-      });
+        return;
+      }
+
+      const apiMessage = error?.response?.data?.resultMessage;
+      setMessage({ type: 'error', text: apiMessage || '내 글 목록을 불러오지 못했습니다.' });
+    }
   };
 
   useEffect(() => {
-    handleGetPosts(0);
-  }, []);
+    if (!token) {
+      navigate('/authentication/sign-in');
+      return;
+    }
+
+    fetchPosts(page);
+  }, [page]);
+
+  const handleDelete = async (postId) => {
+    if (!window.confirm('정말 삭제하시겠습니까?')) {
+      return;
+    }
+
+    try {
+      await axios.delete(`/api/v1/posts/${postId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setMessage({ type: 'success', text: '게시글이 삭제되었습니다.' });
+      fetchPosts(page);
+    } catch (error) {
+      const apiMessage = error?.response?.data?.resultMessage;
+      setMessage({ type: 'error', text: apiMessage || '삭제에 실패했습니다.' });
+    }
+  };
 
   return (
     <DashboardLayout>
-      <MDBox pt={3} pb={3}>
-        {posts.map((post) => (
-          <MDBox pt={2} pb={2} px={3}>
-            <Card>
-              <MDBox pt={2} pb={2} px={3}>
-                <Grid container>
-                  <Grid item xs={6}>
-                    <MDTypography fontWeight="bold" variant="body2">
-                      {post.title}
-                    </MDTypography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <MDTypography variant="body2" textAlign="right">
-                      {post.user.name}
-                    </MDTypography>
-                  </Grid>
-                </Grid>
-                <MDTypography variant="body2">{post.body}</MDTypography>
-                <Grid container>
-                  <Grid item xs={9}></Grid>
-                  <Grid item xs={1}>
-                    <Button onClick={() => handleDetail(post)}>Detail</Button>
-                  </Grid>
-                  <Grid item xs={1}>
-                    <Button onClick={() => handleModify(post)}>Modify</Button>
-                  </Grid>
-                  <Grid item xs={1}>
-                    <Button onClick={() => handleDelete(post.id)}>Delete</Button>
-                  </Grid>
-                </Grid>
-              </MDBox>
-            </Card>
-          </MDBox>
-        ))}
+      <Box className="gh-page">
+        <Box className="gh-hero">
+          <Typography variant="h4" fontWeight={700}>
+            내 글 관리
+          </Typography>
+          <Typography color="text.secondary">작성한 글을 수정하거나 삭제할 수 있습니다.</Typography>
+        </Box>
 
-        <Dialog
-          open={open}
-          TransitionComponent={Transition}
-          keepMounted
-          onClose={handleClose}
-          aria-describedby="alert-dialog-slide-description"
-        >
-          <DialogTitle>{dialogTitle}</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-slide-description">
-              {dialogMessage}
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>OK</Button>
-          </DialogActions>
-        </Dialog>
-      </MDBox>
+        {message.text && (
+          <Alert severity={message.type || 'info'} sx={{ mt: 2 }}>
+            {message.text}
+          </Alert>
+        )}
 
-      <MDPagination>
-        <MDPagination item>
-          <KeyboardArrowLeftIcon></KeyboardArrowLeftIcon>
-        </MDPagination>
-        {[...Array(totalPage).keys()].map((i) => (
-          <MDPagination item onClick={() => changePage(i)}>
-            {i + 1}
-          </MDPagination>
-        ))}
-        <MDPagination item>
-          <KeyboardArrowRightIcon></KeyboardArrowRightIcon>
-        </MDPagination>
-      </MDPagination>
+        <Stack spacing={2} sx={{ mt: 2.4 }}>
+          {posts.map((post) => {
+            const writer = post?.user?.userName || post?.user?.name || 'me';
+            return (
+              <Card key={post.id} className="gh-card" elevation={0}>
+                <CardContent>
+                  <Stack spacing={1.2}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Typography variant="h5" fontWeight={700}>
+                        {post.title}
+                      </Typography>
+                      <Chip label={writer} size="small" />
+                    </Stack>
+                    <Typography className="gh-body-clamp" color="text.secondary">
+                      {post.body}
+                    </Typography>
+                  </Stack>
+                </CardContent>
+                <CardActions>
+                  <Button size="small" onClick={() => navigate('/post-detail', { state: post })}>
+                    상세
+                  </Button>
+                  <Button size="small" onClick={() => navigate('/modify-post', { state: post })}>
+                    수정
+                  </Button>
+                  <Button color="error" size="small" onClick={() => handleDelete(post.id)}>
+                    삭제
+                  </Button>
+                </CardActions>
+              </Card>
+            );
+          })}
+        </Stack>
+
+        {posts.length === 0 && (
+          <Alert severity="info" sx={{ mt: 2 }}>
+            작성한 글이 없습니다.
+          </Alert>
+        )}
+
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+          <Pagination
+            color="primary"
+            page={page}
+            count={totalPages}
+            onChange={(event, nextPage) => setPage(nextPage)}
+          />
+        </Box>
+      </Box>
     </DashboardLayout>
   );
 }
