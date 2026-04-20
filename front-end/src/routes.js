@@ -1,4 +1,9 @@
-import Icon from '@mui/material/Icon';
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import CreateRoundedIcon from '@mui/icons-material/CreateRounded';
+import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
+import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
+import LoginRoundedIcon from '@mui/icons-material/LoginRounded';
+import PersonAddRoundedIcon from '@mui/icons-material/PersonAddRounded';
 
 import Feed from 'layouts/feed';
 import Post from 'layouts/post';
@@ -12,7 +17,7 @@ const routes = [
     type: 'collapse',
     name: 'Feed',
     key: 'feed',
-    icon: <Icon fontSize="small">home</Icon>,
+    icon: <HomeRoundedIcon fontSize="small" />,
     route: '/feed',
     component: <Feed />,
   },
@@ -20,7 +25,7 @@ const routes = [
     type: 'collapse',
     name: 'Write',
     key: 'post',
-    icon: <Icon fontSize="small">edit_note</Icon>,
+    icon: <CreateRoundedIcon fontSize="small" />,
     route: '/post',
     component: <Post />,
   },
@@ -28,7 +33,7 @@ const routes = [
     type: 'collapse',
     name: 'My Posts',
     key: 'my-posts',
-    icon: <Icon fontSize="small">article</Icon>,
+    icon: <DescriptionRoundedIcon fontSize="small" />,
     route: '/my-post',
     component: <MyPosts />,
   },
@@ -36,7 +41,7 @@ const routes = [
     type: 'collapse',
     name: 'Alarms',
     key: 'alarms',
-    icon: <Icon fontSize="small">notifications_active</Icon>,
+    icon: <NotificationsRoundedIcon fontSize="small" />,
     route: '/alarms',
     component: <Alarm />,
   },
@@ -44,7 +49,7 @@ const routes = [
     type: 'collapse',
     name: 'Login',
     key: 'sign-in',
-    icon: <Icon fontSize="small">login</Icon>,
+    icon: <LoginRoundedIcon fontSize="small" />,
     route: '/authentication/sign-in',
     component: <SignIn />,
   },
@@ -52,7 +57,7 @@ const routes = [
     type: 'collapse',
     name: 'Sign Up',
     key: 'sign-up',
-    icon: <Icon fontSize="small">person_add_alt_1</Icon>,
+    icon: <PersonAddRoundedIcon fontSize="small" />,
     route: '/authentication/sign-up',
     component: <SignUp />,
   },
