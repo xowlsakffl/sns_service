@@ -10,23 +10,23 @@ import SignUp from 'layouts/authentication/sign-up';
 const routes = [
   {
     type: 'collapse',
-    name: '피드',
+    name: 'Feed',
     key: 'feed',
-    icon: <Icon fontSize="small">dynamic_feed</Icon>,
+    icon: <Icon fontSize="small">home</Icon>,
     route: '/feed',
     component: <Feed />,
   },
   {
     type: 'collapse',
-    name: '글쓰기',
+    name: 'Write',
     key: 'post',
-    icon: <Icon fontSize="small">edit_square</Icon>,
+    icon: <Icon fontSize="small">edit_note</Icon>,
     route: '/post',
     component: <Post />,
   },
   {
     type: 'collapse',
-    name: '내 글',
+    name: 'My Posts',
     key: 'my-posts',
     icon: <Icon fontSize="small">article</Icon>,
     route: '/my-post',
@@ -34,15 +34,15 @@ const routes = [
   },
   {
     type: 'collapse',
-    name: '알림',
+    name: 'Alarms',
     key: 'alarms',
-    icon: <Icon fontSize="small">notifications</Icon>,
+    icon: <Icon fontSize="small">notifications_active</Icon>,
     route: '/alarms',
     component: <Alarm />,
   },
   {
     type: 'collapse',
-    name: '로그인',
+    name: 'Login',
     key: 'sign-in',
     icon: <Icon fontSize="small">login</Icon>,
     route: '/authentication/sign-in',
@@ -50,13 +50,12 @@ const routes = [
   },
   {
     type: 'collapse',
-    name: '회원가입',
+    name: 'Sign Up',
     key: 'sign-up',
-    icon: <Icon fontSize="small">person_add</Icon>,
+    icon: <Icon fontSize="small">person_add_alt_1</Icon>,
     route: '/authentication/sign-up',
     component: <SignUp />,
   },
 ];
 
 export default routes;
-

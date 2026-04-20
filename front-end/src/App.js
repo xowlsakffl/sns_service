@@ -19,8 +19,7 @@ import 'styles/app.css';
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
-  const { miniSidenav, layout, sidenavColor, transparentSidenav, whiteSidenav, darkMode } =
-    controller;
+  const { miniSidenav, layout, transparentSidenav, whiteSidenav, darkMode } = controller;
   const [onMouseEnter, setOnMouseEnter] = useState(false);
   const { pathname } = useLocation();
   const isAuthRoute = pathname.startsWith('/authentication');
@@ -54,7 +53,7 @@ export default function App() {
       <div className="gh-shell">
         {layout === 'dashboard' && !isAuthRoute && (
           <Sidenav
-            color={sidenavColor}
+            color="info"
             brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
             brandName="SNS Service"
             routes={routes}

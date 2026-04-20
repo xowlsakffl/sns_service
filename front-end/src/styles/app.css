@@ -1,9 +1,10 @@
 :root {
-  --gh-bg: #f4f6f8;
+  --gh-bg: #eef4ff;
   --gh-card: #ffffff;
-  --gh-text: #1e293b;
-  --gh-primary: #0f766e;
-  --gh-primary-soft: #dff3f1;
+  --gh-text: #172554;
+  --gh-primary: #2563eb;
+  --gh-primary-dark: #1d4ed8;
+  --gh-primary-soft: #dbeafe;
 }
 
 html,
@@ -16,7 +17,10 @@ body {
   margin: 0;
   font-family: 'Noto Sans KR', 'Segoe UI', sans-serif;
   color: var(--gh-text);
-  background: linear-gradient(180deg, #f8fafc 0%, #eef3f8 100%);
+  background:
+    radial-gradient(circle at 16% 8%, rgba(37, 99, 235, 0.18), transparent 38%),
+    radial-gradient(circle at 88% 14%, rgba(29, 78, 216, 0.16), transparent 35%),
+    linear-gradient(180deg, #f6f9ff 0%, #edf3ff 100%);
 }
 
 .gh-shell {
@@ -29,18 +33,18 @@ body {
 }
 
 .gh-hero {
-  border: 1px solid rgba(30, 41, 59, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.16);
   border-radius: 16px;
-  background: #ffffff;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(232, 242, 255, 0.95));
   padding: 24px;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 12px 24px rgba(30, 64, 175, 0.12);
 }
 
 .gh-card {
-  border: 1px solid rgba(30, 41, 59, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.14);
   border-radius: 14px;
   background: var(--gh-card);
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 10px 20px rgba(30, 64, 175, 0.1);
 }
 
 .gh-auth-wrap {
@@ -53,9 +57,9 @@ body {
   width: 100%;
   max-width: 560px;
   border-radius: 18px;
-  border: 1px solid rgba(30, 41, 59, 0.1);
-  background: #ffffff;
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.99), rgba(238, 246, 255, 0.98));
+  box-shadow: 0 16px 28px rgba(30, 64, 175, 0.14);
 }
 
 .gh-pill {
@@ -73,6 +77,22 @@ body {
 
 .gh-inline-link:hover {
   text-decoration: underline;
+}
+
+.MuiButton-containedPrimary,
+.MuiButton-contained {
+  background: linear-gradient(135deg, var(--gh-primary), var(--gh-primary-dark));
+  color: #ffffff;
+}
+
+.MuiButton-containedPrimary:hover,
+.MuiButton-contained:hover {
+  background: linear-gradient(135deg, var(--gh-primary-dark), #1e40af);
+}
+
+.MuiButton-outlined {
+  border-color: rgba(37, 99, 235, 0.5);
+  color: var(--gh-primary-dark);
 }
 
 .gh-body-clamp {
