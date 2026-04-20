@@ -12,4 +12,5 @@ public interface PostEntityRepository extends JpaRepository<PostEntity, Integer>
 
     Page<PostEntity> findAllByUser(UserEntity entity, Pageable pageable);
     Page<PostEntity> findAllByBlindedFalse(Pageable pageable);
+    long countByBlindedTrue();
 }

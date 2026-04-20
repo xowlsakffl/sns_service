@@ -1,5 +1,6 @@
 package dev.be.snsservice.model.entity;
 
+import dev.be.snsservice.model.ReportReasonType;
 import dev.be.snsservice.model.ReportStatus;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -40,8 +41,12 @@ public class PostReportEntity {
     @Column(name = "status", nullable = false)
     private ReportStatus status = ReportStatus.PENDING;
 
-    @Column(name = "reason", length = 500, nullable = false)
-    private String reason;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "reason_type", nullable = false)
+    private ReportReasonType reasonType;
+
+    @Column(name = "reason_detail", length = 500)
+    private String reasonDetail;
 
     @Column(name = "registered_at")
     private Timestamp registeredAt;
@@ -59,11 +64,12 @@ public class PostReportEntity {
         this.updatedAt = Timestamp.from(Instant.now());
     }
 
-    public static PostReportEntity of(PostEntity post, UserEntity reporter, String reason) {
+    public static PostReportEntity of(PostEntity post, UserEntity reporter, ReportReasonType reasonType, String reasonDetail) {
         PostReportEntity entity = new PostReportEntity();
         entity.setPost(post);
         entity.setReporter(reporter);
-        entity.setReason(reason);
+        entity.setReasonType(reasonType);
+        entity.setReasonDetail(reasonDetail);
         entity.setStatus(ReportStatus.PENDING);
         return entity;
     }

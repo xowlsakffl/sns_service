@@ -1,6 +1,7 @@
 package dev.be.snsservice.controller.response;
 
 import dev.be.snsservice.model.PostReport;
+import dev.be.snsservice.model.ReportReasonType;
 import dev.be.snsservice.model.ReportStatus;
 import java.sql.Timestamp;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,8 @@ public class PostReportResponse {
     private Integer reporterId;
     private String reporterUsername;
     private ReportStatus status;
-    private String reason;
+    private ReportReasonType reasonType;
+    private String reasonDetail;
     private Integer processedByUserId;
     private Timestamp registeredAt;
     private Timestamp updatedAt;
@@ -26,7 +28,8 @@ public class PostReportResponse {
                 report.getReporterId(),
                 report.getReporterUsername(),
                 report.getStatus(),
-                report.getReason(),
+                report.getReasonType(),
+                report.getReasonDetail(),
                 report.getProcessedByUserId(),
                 report.getRegisteredAt(),
                 report.getUpdatedAt()

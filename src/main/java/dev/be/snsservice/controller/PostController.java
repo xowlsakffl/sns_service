@@ -7,8 +7,11 @@ import dev.be.snsservice.controller.request.PostReportRequest;
 import dev.be.snsservice.controller.response.CommentResponse;
 import dev.be.snsservice.controller.response.PostResponse;
 import dev.be.snsservice.controller.response.PostReportResponse;
+import dev.be.snsservice.controller.response.ReportDashboardResponse;
 import dev.be.snsservice.controller.response.Response;
 import dev.be.snsservice.model.Post;
+import dev.be.snsservice.model.ReportReasonType;
+import dev.be.snsservice.model.ReportStatus;
 import dev.be.snsservice.service.PostService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -77,13 +80,25 @@ public class PostController {
 
     @PostMapping("/{postId}/reports")
     public Response<Void> report(@PathVariable Integer postId, @Valid @RequestBody PostReportRequest request, Authentication authentication){
-        postService.report(postId, authentication.getName(), request.getReason());
+        postService.report(postId, authentication.getName(), request.getReasonType(), request.getReasonDetail());
         return Response.success();
     }
 
     @GetMapping("/reports")
-    public Response<Page<PostReportResponse>> reports(Pageable pageable, Authentication authentication){
-        return Response.success(postService.reportList(authentication.getName(), pageable).map(PostReportResponse::fromReport));
+    public Response<Page<PostReportResponse>> reports(
+            Pageable pageable,
+            Authentication authentication,
+            @RequestParam(required = false) ReportStatus status,
+            @RequestParam(required = false) ReportReasonType reasonType,
+            @RequestParam(required = false) Integer postId,
+            @RequestParam(required = false) String reporterUsername
+    ){
+        return Response.success(postService.reportList(authentication.getName(), pageable, status, reasonType, postId, reporterUsername).map(PostReportResponse::fromReport));
+    }
+
+    @GetMapping("/reports/dashboard")
+    public Response<ReportDashboardResponse> reportDashboard(Authentication authentication) {
+        return Response.success(postService.reportDashboard(authentication.getName()));
     }
 
     @PatchMapping("/reports/{reportId}/accept-blind")

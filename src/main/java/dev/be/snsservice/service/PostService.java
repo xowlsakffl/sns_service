@@ -1,5 +1,6 @@
-package dev.be.snsservice.service;
+﻿package dev.be.snsservice.service;
 
+import dev.be.snsservice.controller.response.ReportDashboardResponse;
 import dev.be.snsservice.exception.ErrorCode;
 import dev.be.snsservice.exception.SnsApplicationException;
 import dev.be.snsservice.model.AlarmArgs;
@@ -7,6 +8,7 @@ import dev.be.snsservice.model.AlarmType;
 import dev.be.snsservice.model.Comment;
 import dev.be.snsservice.model.Post;
 import dev.be.snsservice.model.PostReport;
+import dev.be.snsservice.model.ReportReasonType;
 import dev.be.snsservice.model.ReportStatus;
 import dev.be.snsservice.model.UserRole;
 import dev.be.snsservice.model.entity.AlarmEntity;
@@ -21,9 +23,13 @@ import dev.be.snsservice.repository.LikeEntityRepository;
 import dev.be.snsservice.repository.PostEntityRepository;
 import dev.be.snsservice.repository.PostReportEntityRepository;
 import dev.be.snsservice.repository.UserEntityRepository;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -130,19 +136,23 @@ public class PostService {
     }
 
     @Transactional
-    public void report(Integer postId, String reporterUsername, String reason) {
+    public void report(Integer postId, String reporterUsername, ReportReasonType reasonType, String reasonDetail) {
         PostEntity postEntity = getPostEntityOrException(postId);
         UserEntity reporter = getUserEntityOrException(reporterUsername);
+        String normalizedReasonDetail = reasonDetail != null ? reasonDetail.trim() : null;
 
         if (postEntity.getUser().getId().equals(reporter.getId())) {
             throw new SnsApplicationException(ErrorCode.INVALID_REQUEST, "can not report own post");
+        }
+        if (reasonType == ReportReasonType.ETC && (normalizedReasonDetail == null || normalizedReasonDetail.isBlank())) {
+            throw new SnsApplicationException(ErrorCode.INVALID_REQUEST, "reasonDetail is required for ETC");
         }
 
         if (postReportEntityRepository.existsByPostAndReporterAndStatus(postEntity, reporter, ReportStatus.PENDING)) {
             throw new SnsApplicationException(ErrorCode.ALREADY_REPORTED, "already reported this post");
         }
 
-        postReportEntityRepository.save(PostReportEntity.of(postEntity, reporter, reason));
+        postReportEntityRepository.save(PostReportEntity.of(postEntity, reporter, reasonType, normalizedReasonDetail));
 
         long pendingCount = postReportEntityRepository.countByPostAndStatus(postEntity, ReportStatus.PENDING);
         if (pendingCount >= AUTO_BLIND_REPORT_THRESHOLD && !postEntity.isBlinded()) {
@@ -150,9 +160,46 @@ public class PostService {
         }
     }
 
-    public Page<PostReport> reportList(String username, Pageable pageable) {
+    public Page<PostReport> reportList(String username, Pageable pageable, ReportStatus status, ReportReasonType reasonType, Integer postId, String reporterUsername) {
         getAdminUserEntityOrThrow(username);
-        return postReportEntityRepository.findAll(pageable).map(PostReport::fromEntity);
+
+        Specification<PostReportEntity> specification = Specification.where(null);
+
+        if (status != null) {
+            specification = specification.and((root, query, cb) -> cb.equal(root.get("status"), status));
+        }
+        if (reasonType != null) {
+            specification = specification.and((root, query, cb) -> cb.equal(root.get("reasonType"), reasonType));
+        }
+        if (postId != null) {
+            specification = specification.and((root, query, cb) -> cb.equal(root.get("post").get("id"), postId));
+        }
+        if (reporterUsername != null && !reporterUsername.isBlank()) {
+            String pattern = "%" + reporterUsername.toLowerCase() + "%";
+            specification = specification.and((root, query, cb) -> cb.like(cb.lower(root.get("reporter").get("username")), pattern));
+        }
+
+        return postReportEntityRepository.findAll(specification, pageable).map(PostReport::fromEntity);
+    }
+
+    public ReportDashboardResponse reportDashboard(String username) {
+        getAdminUserEntityOrThrow(username);
+
+        Timestamp todayStart = Timestamp.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        return new ReportDashboardResponse(
+                postReportEntityRepository.count(),
+                postReportEntityRepository.countByStatus(ReportStatus.PENDING),
+                postReportEntityRepository.countByStatus(ReportStatus.ACCEPTED),
+                postReportEntityRepository.countByStatus(ReportStatus.REJECTED),
+                postReportEntityRepository.countByReasonType(ReportReasonType.SPAM),
+                postReportEntityRepository.countByReasonType(ReportReasonType.ABUSE),
+                postReportEntityRepository.countByReasonType(ReportReasonType.SEXUAL),
+                postReportEntityRepository.countByReasonType(ReportReasonType.HATE),
+                postReportEntityRepository.countByReasonType(ReportReasonType.ETC),
+                postEntityRepository.countByBlindedTrue(),
+                postReportEntityRepository.countByRegisteredAtAfter(todayStart)
+        );
     }
 
     @Transactional
