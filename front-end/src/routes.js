@@ -10,7 +10,7 @@ import SignUp from 'layouts/authentication/sign-up';
 const routes = [
   {
     type: 'collapse',
-    name: 'ÇÇµå',
+    name: 'í”¼ë“œ',
     key: 'feed',
     icon: <Icon fontSize="small">dynamic_feed</Icon>,
     route: '/feed',
@@ -18,7 +18,7 @@ const routes = [
   },
   {
     type: 'collapse',
-    name: '±Û¾²±â',
+    name: 'ê¸€ì“°ê¸°',
     key: 'post',
     icon: <Icon fontSize="small">edit_square</Icon>,
     route: '/post',
@@ -26,7 +26,7 @@ const routes = [
   },
   {
     type: 'collapse',
-    name: '³» ±Û',
+    name: 'ë‚´ ê¸€',
     key: 'my-posts',
     icon: <Icon fontSize="small">article</Icon>,
     route: '/my-post',
@@ -34,7 +34,7 @@ const routes = [
   },
   {
     type: 'collapse',
-    name: '¾Ë¸²',
+    name: 'ì•Œë¦¼',
     key: 'alarms',
     icon: <Icon fontSize="small">notifications</Icon>,
     route: '/alarms',
@@ -42,7 +42,7 @@ const routes = [
   },
   {
     type: 'collapse',
-    name: '·Î±×ÀÎ',
+    name: 'ë¡œê·¸ì¸',
     key: 'sign-in',
     icon: <Icon fontSize="small">login</Icon>,
     route: '/authentication/sign-in',
@@ -50,7 +50,7 @@ const routes = [
   },
   {
     type: 'collapse',
-    name: 'È¸¿ø°¡ÀÔ',
+    name: 'íšŒì›ê°€ì…',
     key: 'sign-up',
     icon: <Icon fontSize="small">person_add</Icon>,
     route: '/authentication/sign-up',
@@ -59,3 +59,4 @@ const routes = [
 ];
 
 export default routes;
+

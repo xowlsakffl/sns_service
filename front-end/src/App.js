@@ -23,6 +23,7 @@ export default function App() {
     controller;
   const [onMouseEnter, setOnMouseEnter] = useState(false);
   const { pathname } = useLocation();
+  const isAuthRoute = pathname.startsWith('/authentication');
 
   useEffect(() => {
     document.documentElement.scrollTop = 0;
@@ -51,11 +52,11 @@ export default function App() {
     <ThemeProvider theme={darkMode ? themeDark : theme}>
       <CssBaseline />
       <div className="gh-shell">
-        {layout === 'dashboard' && (
+        {layout === 'dashboard' && !isAuthRoute && (
           <Sidenav
             color={sidenavColor}
             brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
-            brandName="GameHub SNS"
+            brandName="SNS Service"
             routes={routes}
             onMouseEnter={handleOnMouseEnter}
             onMouseLeave={handleOnMouseLeave}
@@ -72,3 +73,4 @@ export default function App() {
     </ThemeProvider>
   );
 }
+

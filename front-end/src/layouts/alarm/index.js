@@ -43,7 +43,7 @@ function Alarm() {
       }
 
       const apiMessage = error?.response?.data?.resultMessage;
-      setMessage({ type: 'error', text: apiMessage || '¾Ë¸²À» ºÒ·¯¿ÀÁö ¸øÇß½À´Ï´Ù.' });
+      setMessage({ type: 'error', text: apiMessage || 'ì•Œë¦¼ì„ ë¶ˆëŸ¬ì˜¤ì§€ ëª»í–ˆìŠµë‹ˆë‹¤.' });
     }
   };
 
@@ -86,10 +86,10 @@ function Alarm() {
       <Box className="gh-page">
         <Box className="gh-hero">
           <Typography variant="h4" fontWeight={700}>
-            ½Ç½Ã°£ ¾Ë¸²
+            ì‹¤ì‹œê°„ ì•Œë¦¼
           </Typography>
           <Typography color="text.secondary">
-            ´ñ±Û, ÁÁ¾Æ¿ä µî ÀÌº¥Æ® ¾Ë¸²À» ÃÖ½Å¼øÀ¸·Î È®ÀÎÇÕ´Ï´Ù.
+            ëŒ“ê¸€, ì¢‹ì•„ìš” ë“± ì´ë²¤íŠ¸ ì•Œë¦¼ì„ ìµœì‹ ìˆœìœ¼ë¡œ í™•ì¸í•©ë‹ˆë‹¤.
           </Typography>
         </Box>
 
@@ -114,7 +114,7 @@ function Alarm() {
 
         {alarms.length === 0 && (
           <Alert severity="info" sx={{ mt: 2 }}>
-            »õ·Î¿î ¾Ë¸²ÀÌ ¾ø½À´Ï´Ù.
+            ìƒˆë¡œìš´ ì•Œë¦¼ì´ ì—†ìŠµë‹ˆë‹¤.
           </Alert>
         )}
 
@@ -132,3 +132,4 @@ function Alarm() {
 }
 
 export default Alarm;
+

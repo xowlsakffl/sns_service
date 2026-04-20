@@ -29,7 +29,7 @@ function Feed() {
 
   const fetchPosts = async (nextPage = 1) => {
     if (!hasToken) {
-      setErrorMessage('·Î±×ÀÎÀÌ ÇÊ¿äÇÕ´Ï´Ù.');
+      setErrorMessage('ë¡œê·¸ì¸ì´ í•„ìš”í•©ë‹ˆë‹¤.');
       return;
     }
 
@@ -53,7 +53,7 @@ function Feed() {
       }
 
       const apiMessage = error?.response?.data?.resultMessage;
-      setErrorMessage(apiMessage || 'ÇÇµå¸¦ ºÒ·¯¿ÀÁö ¸øÇß½À´Ï´Ù.');
+      setErrorMessage(apiMessage || 'í”¼ë“œë¥¼ ë¶ˆëŸ¬ì˜¤ì§€ ëª»í–ˆìŠµë‹ˆë‹¤.');
     } finally {
       setLoading(false);
     }
@@ -68,24 +68,24 @@ function Feed() {
       <Box className="gh-page">
         <Box className="gh-hero">
           <Typography variant="h3" fontWeight={700}>
-            ¸ÅÄª ÇÇµå
+            SNS í”¼ë“œ
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            ½Ç½Ã°£ ¸ğÁı ±ÛÀ» È®ÀÎÇÏ°í ¹Ù·Î ÆÄÆ¼¿¡ ÇÕ·ùÇÏ¼¼¿ä.
+            ìµœì‹  ê²Œì‹œê¸€ì„ í™•ì¸í•˜ê³  ëŒ“ê¸€ê³¼ ì¢‹ì•„ìš”ë¡œ ì†Œí†µí•˜ì„¸ìš”.
           </Typography>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.2} sx={{ mt: 2 }}>
             <Button variant="contained" onClick={() => navigate('/post')}>
-              ±Û ÀÛ¼º
+              ê¸€ ì‘ì„±
             </Button>
             <Button variant="outlined" onClick={() => navigate('/my-post')}>
-              ³» ±Û °ü¸®
+              ë‚´ ê¸€ ê´€ë¦¬
             </Button>
           </Stack>
         </Box>
 
         {!hasToken && (
           <Alert severity="warning" sx={{ mt: 2 }}>
-            ·Î±×ÀÎ ÈÄ ÇÇµå¸¦ È®ÀÎÇÒ ¼ö ÀÖ½À´Ï´Ù.
+            ë¡œê·¸ì¸ í›„ í”¼ë“œë¥¼ í™•ì¸í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤.
           </Alert>
         )}
         {errorMessage && (
@@ -114,7 +114,7 @@ function Feed() {
                 </CardContent>
                 <CardActions>
                   <Button size="small" onClick={() => navigate('/post-detail', { state: post })}>
-                    »ó¼¼ º¸±â
+                    ìƒì„¸ ë³´ê¸°
                   </Button>
                 </CardActions>
               </Card>
@@ -124,7 +124,7 @@ function Feed() {
 
         {!loading && posts.length === 0 && hasToken && (
           <Alert severity="info" sx={{ mt: 2 }}>
-            ¾ÆÁ÷ µî·ÏµÈ ±ÛÀÌ ¾ø½À´Ï´Ù. Ã¹ ±ÛÀ» ÀÛ¼ºÇØº¸¼¼¿ä.
+            ì•„ì§ ë“±ë¡ëœ ê¸€ì´ ì—†ìŠµë‹ˆë‹¤. ì²« ê¸€ì„ ì‘ì„±í•´ë³´ì„¸ìš”.
           </Alert>
         )}
 
@@ -142,3 +142,4 @@ function Feed() {
 }
 
 export default Feed;
+

@@ -29,12 +29,12 @@ function ModifyPost() {
     event.preventDefault();
 
     if (!postId) {
-      setMessage({ type: 'error', text: '¼öÁ¤ÇÒ ±Û Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.' });
+      setMessage({ type: 'error', text: 'ìˆ˜ì •í•  ê¸€ ì •ë³´ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.' });
       return;
     }
 
     if (!title.trim() || !body.trim()) {
-      setMessage({ type: 'error', text: 'Á¦¸ñ°ú º»¹®À» ¸ğµÎ ÀÔ·ÂÇØÁÖ¼¼¿ä.' });
+      setMessage({ type: 'error', text: 'ì œëª©ê³¼ ë³¸ë¬¸ì„ ëª¨ë‘ ì…ë ¥í•´ì£¼ì„¸ìš”.' });
       return;
     }
 
@@ -48,11 +48,11 @@ function ModifyPost() {
         { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      setMessage({ type: 'success', text: '°Ô½Ã±ÛÀÌ ¼öÁ¤µÇ¾ú½À´Ï´Ù.' });
+      setMessage({ type: 'success', text: 'ê²Œì‹œê¸€ì´ ìˆ˜ì •ë˜ì—ˆìŠµë‹ˆë‹¤.' });
       setTimeout(() => navigate('/my-post'), 500);
     } catch (error) {
       const apiMessage = error?.response?.data?.resultMessage;
-      setMessage({ type: 'error', text: apiMessage || '¼öÁ¤¿¡ ½ÇÆĞÇß½À´Ï´Ù.' });
+      setMessage({ type: 'error', text: apiMessage || 'ìˆ˜ì •ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.' });
     } finally {
       setLoading(false);
     }
@@ -62,9 +62,9 @@ function ModifyPost() {
     return (
       <DashboardLayout>
         <Box className="gh-page">
-          <Alert severity="warning">¼öÁ¤ÇÒ ±Û Á¤º¸°¡ ¾ø½À´Ï´Ù. ³» ±Û¿¡¼­ ´Ù½Ã ¼±ÅÃÇØÁÖ¼¼¿ä.</Alert>
+          <Alert severity="warning">ìˆ˜ì •í•  ê¸€ ì •ë³´ê°€ ì—†ìŠµë‹ˆë‹¤. ë‚´ ê¸€ì—ì„œ ë‹¤ì‹œ ì„ íƒí•´ì£¼ì„¸ìš”.</Alert>
           <Button sx={{ mt: 2 }} variant="contained" onClick={() => navigate('/my-post')}>
-            ³» ±Û·Î ÀÌµ¿
+            ë‚´ ê¸€ë¡œ ì´ë™
           </Button>
         </Box>
       </DashboardLayout>
@@ -78,20 +78,20 @@ function ModifyPost() {
           <CardContent sx={{ p: { xs: 2.4, sm: 3.2 } }}>
             <Stack spacing={2.2}>
               <Typography variant="h4" fontWeight={700}>
-                °Ô½Ã±Û ¼öÁ¤
+                ê²Œì‹œê¸€ ìˆ˜ì •
               </Typography>
               {message.text && <Alert severity={message.type || 'info'}>{message.text}</Alert>}
 
               <Box component="form" onSubmit={handleSubmit}>
                 <Stack spacing={2}>
                   <TextField
-                    label="Á¦¸ñ"
+                    label="ì œëª©"
                     value={title}
                     onChange={(event) => setTitle(event.target.value)}
                     fullWidth
                   />
                   <TextField
-                    label="º»¹®"
+                    label="ë³¸ë¬¸"
                     value={body}
                     onChange={(event) => setBody(event.target.value)}
                     multiline
@@ -100,10 +100,10 @@ function ModifyPost() {
                   />
                   <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.2}>
                     <Button type="submit" variant="contained" disabled={loading}>
-                      {loading ? 'ÀúÀå Áß...' : '¼öÁ¤ ÀúÀå'}
+                      {loading ? 'ì €ì¥ ì¤‘...' : 'ìˆ˜ì • ì €ì¥'}
                     </Button>
                     <Button variant="outlined" onClick={() => navigate('/my-post')}>
-                      Ãë¼Ò
+                      ì·¨ì†Œ
                     </Button>
                   </Stack>
                 </Stack>
@@ -117,3 +117,4 @@ function ModifyPost() {
 }
 
 export default ModifyPost;
+

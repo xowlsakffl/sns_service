@@ -1,13 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=Sora:wght@400;600;700&display=swap');
-
 :root {
-  --gh-bg: #f7f6f3;
-  --gh-card: #fffdfa;
-  --gh-text: #1b2530;
-  --gh-muted: #637082;
+  --gh-bg: #f4f6f8;
+  --gh-card: #ffffff;
+  --gh-text: #1e293b;
   --gh-primary: #0f766e;
-  --gh-primary-soft: #d9f2ef;
-  --gh-accent: #ff8a3d;
+  --gh-primary-soft: #dff3f1;
 }
 
 html,
@@ -18,12 +14,9 @@ body,
 
 body {
   margin: 0;
-  font-family: 'Noto Sans KR', sans-serif;
+  font-family: 'Noto Sans KR', 'Segoe UI', sans-serif;
   color: var(--gh-text);
-  background:
-    radial-gradient(circle at 12% 18%, rgba(15, 118, 110, 0.12), transparent 36%),
-    radial-gradient(circle at 85% 12%, rgba(255, 138, 61, 0.14), transparent 38%),
-    linear-gradient(180deg, #f9f8f4 0%, #f1efe9 100%);
+  background: linear-gradient(180deg, #f8fafc 0%, #eef3f8 100%);
 }
 
 .gh-shell {
@@ -33,28 +26,21 @@ body {
 .gh-page {
   max-width: 980px;
   margin: 0 auto;
-  animation: ghFadeUp 0.45s ease;
 }
 
 .gh-hero {
-  border: 1px solid rgba(27, 37, 48, 0.08);
-  border-radius: 20px;
-  background: linear-gradient(120deg, rgba(255, 255, 255, 0.94), rgba(240, 255, 252, 0.88));
+  border: 1px solid rgba(30, 41, 59, 0.08);
+  border-radius: 16px;
+  background: #ffffff;
   padding: 24px;
-  box-shadow: 0 14px 34px rgba(17, 24, 39, 0.08);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
 }
 
 .gh-card {
-  border: 1px solid rgba(27, 37, 48, 0.08);
-  border-radius: 18px;
+  border: 1px solid rgba(30, 41, 59, 0.08);
+  border-radius: 14px;
   background: var(--gh-card);
-  box-shadow: 0 12px 30px rgba(13, 20, 30, 0.08);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-}
-
-.gh-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 32px rgba(13, 20, 30, 0.11);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
 }
 
 .gh-auth-wrap {
@@ -66,10 +52,10 @@ body {
 .gh-auth-card {
   width: 100%;
   max-width: 560px;
-  border-radius: 22px;
-  border: 1px solid rgba(27, 37, 48, 0.09);
-  background: linear-gradient(150deg, rgba(255, 255, 255, 0.98), rgba(245, 251, 250, 0.94));
-  box-shadow: 0 16px 38px rgba(9, 15, 23, 0.12);
+  border-radius: 18px;
+  border: 1px solid rgba(30, 41, 59, 0.1);
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
 }
 
 .gh-pill {
@@ -96,35 +82,13 @@ body {
   overflow: hidden;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: 'Sora', 'Noto Sans KR', sans-serif;
-  letter-spacing: -0.01em;
-}
-
-@keyframes ghFadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @media (max-width: 900px) {
   .gh-page {
     max-width: 100%;
   }
 
   .gh-hero {
-    border-radius: 16px;
-    padding: 20px;
+    border-radius: 12px;
+    padding: 18px;
   }
 }
