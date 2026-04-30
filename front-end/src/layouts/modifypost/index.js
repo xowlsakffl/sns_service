@@ -29,12 +29,12 @@ function ModifyPost() {
     event.preventDefault();
 
     if (!postId) {
-      setMessage({ type: 'error', text: '수정할 글 정보를 찾을 수 없습니다.' });
+      setMessage({ type: 'error', text: '수정할 게시글 정보를 찾을 수 없습니다.' });
       return;
     }
 
     if (!title.trim() || !body.trim()) {
-      setMessage({ type: 'error', text: '제목과 본문을 모두 입력해주세요.' });
+      setMessage({ type: 'error', text: '제목과 본문을 모두 입력해 주세요.' });
       return;
     }
 
@@ -52,7 +52,7 @@ function ModifyPost() {
       setTimeout(() => navigate('/my-post'), 500);
     } catch (error) {
       const apiMessage = error?.response?.data?.resultMessage;
-      setMessage({ type: 'error', text: apiMessage || '수정에 실패했습니다.' });
+      setMessage({ type: 'error', text: apiMessage || '게시글 수정에 실패했습니다.' });
     } finally {
       setLoading(false);
     }
@@ -62,9 +62,9 @@ function ModifyPost() {
     return (
       <DashboardLayout>
         <Box className="gh-page">
-          <Alert severity="warning">수정할 글 정보가 없습니다. 내 글에서 다시 선택해주세요.</Alert>
+          <Alert severity="warning">수정할 게시글 정보가 없습니다. 내 게시물에서 다시 선택해 주세요.</Alert>
           <Button sx={{ mt: 2 }} variant="contained" onClick={() => navigate('/my-post')}>
-            내 글로 이동
+            내 게시물로 이동
           </Button>
         </Box>
       </DashboardLayout>
@@ -100,7 +100,7 @@ function ModifyPost() {
                   />
                   <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.2}>
                     <Button type="submit" variant="contained" disabled={loading}>
-                      {loading ? '저장 중...' : '수정 저장'}
+                      {loading ? '수정 중...' : '수정 저장'}
                     </Button>
                     <Button variant="outlined" onClick={() => navigate('/my-post')}>
                       취소
@@ -117,4 +117,3 @@ function ModifyPost() {
 }
 
 export default ModifyPost;
-

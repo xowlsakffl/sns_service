@@ -1,0 +1,39 @@
+{
+  "metrics": {
+    "width": 1440,
+    "bodyScrollWidth": 1440,
+    "bodyClientWidth": 1440,
+    "rail": {
+      "x": 179,
+      "y": 0,
+      "width": 244,
+      "height": 1400,
+      "top": 0,
+      "right": 423,
+      "bottom": 1400,
+      "left": 179
+    },
+    "main": {
+      "x": 455,
+      "y": 24,
+      "width": 470,
+      "height": 5110.21875,
+      "top": 24,
+      "right": 925,
+      "bottom": 5134.21875,
+      "left": 455
+    },
+    "right": {
+      "x": 941,
+      "y": 24,
+      "width": 320,
+      "height": 543.40625,
+      "top": 24,
+      "right": 1261,
+      "bottom": 567.40625,
+      "left": 941
+    },
+    "feedCards": 6
+  },
+  "logs": []
+}

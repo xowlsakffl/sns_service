@@ -32,7 +32,7 @@ function Post() {
     }
 
     if (!title.trim() || !body.trim()) {
-      setMessage({ type: 'error', text: '제목과 본문을 모두 입력해주세요.' });
+      setMessage({ type: 'error', text: '제목과 본문을 모두 입력해 주세요.' });
       return;
     }
 
@@ -73,10 +73,10 @@ function Post() {
           <CardContent sx={{ p: { xs: 2.4, sm: 3.2 } }}>
             <Stack spacing={2.2}>
               <Typography variant="h4" fontWeight={700}>
-                새 글 작성
+                게시글 작성
               </Typography>
               <Typography color="text.secondary">
-                공유하고 싶은 내용, 링크, 해시태그를 자유롭게 작성하세요.
+                공유하고 싶은 내용, 후기, 메모를 간단하게 등록할 수 있습니다.
               </Typography>
 
               {message.text && <Alert severity={message.type || 'info'}>{message.text}</Alert>}
@@ -99,7 +99,7 @@ function Post() {
                   />
                   <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.2}>
                     <Button type="submit" variant="contained" disabled={loading}>
-                      {loading ? '저장 중...' : '등록'}
+                      {loading ? '등록 중...' : '등록'}
                     </Button>
                     <Button variant="outlined" onClick={() => navigate('/feed')}>
                       취소
@@ -116,4 +116,3 @@ function Post() {
 }
 
 export default Post;
-

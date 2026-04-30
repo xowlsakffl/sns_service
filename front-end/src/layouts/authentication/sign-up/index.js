@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -20,12 +20,19 @@ function SignUp() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (userName.trim().length < 2) {
-      setMessage({ type: 'error', text: '아이디는 2자 이상 입력해주세요.' });
+      setMessage({ type: 'error', text: '아이디는 두 글자 이상 입력해 주세요.' });
       return;
     }
 
@@ -35,21 +42,29 @@ function SignUp() {
     }
 
     try {
-      setLoading(true);
-      setMessage({ type: '', text: '' });
+      if (mountedRef.current) {
+        setLoading(true);
+        setMessage({ type: '', text: '' });
+      }
 
       await axios.post('/api/v1/users/join', {
         name: userName.trim(),
         password,
       });
 
-      setMessage({ type: 'success', text: '회원가입 완료. 로그인 페이지로 이동합니다.' });
+      if (mountedRef.current) {
+        setMessage({ type: 'success', text: '회원가입이 완료되었습니다. 로그인 화면으로 이동합니다.' });
+      }
       setTimeout(() => navigate('/authentication/sign-in'), 700);
     } catch (error) {
       const apiMessage = error?.response?.data?.resultMessage;
-      setMessage({ type: 'error', text: apiMessage || '회원가입에 실패했습니다.' });
+      if (mountedRef.current) {
+        setMessage({ type: 'error', text: apiMessage || '회원가입에 실패했습니다.' });
+      }
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -59,12 +74,12 @@ function SignUp() {
         <Card className="gh-auth-card" elevation={0}>
           <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
             <Stack spacing={2.5}>
-              <Chip label="SNS Service" className="gh-pill" />
-              <Typography variant="h3" fontWeight={700}>
+              <Chip label="SNS 서비스" className="gh-pill" />
+              <Typography variant="h4" fontWeight={700}>
                 회원가입
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                SNS Service 계정을 만들고 바로 피드에 참여하세요.
+                새 계정을 만들고 바로 피드에 참여할 수 있습니다.
               </Typography>
 
               {message.text && <Alert severity={message.type || 'info'}>{message.text}</Alert>}
@@ -106,4 +121,3 @@ function SignUp() {
 }
 
 export default SignUp;
-

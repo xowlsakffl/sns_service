@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -20,20 +20,29 @@ function SignIn() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const mountedRef = useRef(true);
 
   const token = localStorage.getItem('token') || '';
   const isLoggedIn = Boolean(token);
 
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!userName.trim() || !password.trim()) {
-      setMessage({ type: 'error', text: '아이디와 비밀번호를 입력해주세요.' });
+      setMessage({ type: 'error', text: '아이디와 비밀번호를 입력해 주세요.' });
       return;
     }
 
     try {
-      setLoading(true);
-      setMessage({ type: '', text: '' });
+      if (mountedRef.current) {
+        setLoading(true);
+        setMessage({ type: '', text: '' });
+      }
 
       const res = await axios.post('/api/v1/users/login', {
         name: userName.trim(),
@@ -42,16 +51,20 @@ function SignIn() {
 
       const nextToken = res?.data?.result?.token;
       if (!nextToken) {
-        throw new Error('토큰이 응답에 없습니다.');
+        throw new Error('토큰 응답이 없습니다.');
       }
 
       localStorage.setItem('token', nextToken);
       navigate('/feed');
     } catch (error) {
       const apiMessage = error?.response?.data?.resultMessage;
-      setMessage({ type: 'error', text: apiMessage || '로그인에 실패했습니다.' });
+      if (mountedRef.current) {
+        setMessage({ type: 'error', text: apiMessage || '로그인에 실패했습니다.' });
+      }
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -67,19 +80,19 @@ function SignIn() {
         <Card className="gh-auth-card" elevation={0}>
           <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
             <Stack spacing={2.5}>
-              <Chip label="SNS Service" className="gh-pill" />
-              <Typography variant="h3" fontWeight={700}>
+              <Chip label="SNS 서비스" className="gh-pill" />
+              <Typography variant="h4" fontWeight={700}>
                 로그인
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                기본 계정은 없습니다. 회원가입 후 로그인하세요.
+                데모 계정이나 기존 계정으로 바로 접속할 수 있습니다.
               </Typography>
 
               {message.text && <Alert severity={message.type || 'info'}>{message.text}</Alert>}
 
               {isLoggedIn ? (
                 <Stack spacing={2}>
-                  <Alert severity="success">현재 로그인 상태입니다.</Alert>
+                  <Alert severity="success">현재 로그인된 상태입니다.</Alert>
                   <Button variant="contained" size="large" onClick={() => navigate('/feed')}>
                     피드로 이동
                   </Button>
@@ -126,4 +139,3 @@ function SignIn() {
 }
 
 export default SignIn;
-
