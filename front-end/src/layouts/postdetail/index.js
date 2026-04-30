@@ -23,7 +23,7 @@ function PostDetail() {
 
   const postId = state?.id;
   const title = state?.title || '';
-  const writer = state?.user?.userName || state?.user?.name || 'unknown';
+  const writer = state?.user?.username || state?.user?.userName || state?.user?.name || 'unknown';
   const body = state?.body || '';
 
   const [likes, setLikes] = useState(0);
@@ -184,9 +184,9 @@ function PostDetail() {
             </Typography>
             <Stack spacing={1.2} sx={{ mt: 1.5 }}>
               {comments.map((item) => (
-                <Box key={item.id || `${item.userName}-${item.comment}`}>
+                <Box key={item.id || `${item.username || item.userName}-${item.comment}`}>
                   <Typography fontWeight={600}>
-                    {item.userName || item.user?.userName || 'unknown'}
+                    {item.username || item.userName || item.user?.username || item.user?.userName || 'unknown'}
                   </Typography>
                   <Typography color="text.secondary">{item.comment || ''}</Typography>
                   <Divider sx={{ mt: 1.1 }} />

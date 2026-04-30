@@ -96,7 +96,7 @@ function Feed() {
 
         <Stack spacing={2} sx={{ mt: 2.5 }}>
           {posts.map((post) => {
-            const writer = post?.user?.userName || post?.user?.name || 'unknown';
+            const writer = post?.user?.username || post?.user?.userName || post?.user?.name || 'unknown';
             return (
               <Card key={post.id} className="gh-card" elevation={0}>
                 <CardContent>

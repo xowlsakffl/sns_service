@@ -90,7 +90,7 @@ function MyPosts() {
 
         <Stack spacing={2} sx={{ mt: 2.4 }}>
           {posts.map((post) => {
-            const writer = post?.user?.userName || post?.user?.name || 'me';
+            const writer = post?.user?.username || post?.user?.userName || post?.user?.name || 'me';
             return (
               <Card key={post.id} className="gh-card" elevation={0}>
                 <CardContent>

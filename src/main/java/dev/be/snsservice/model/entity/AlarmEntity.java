@@ -43,7 +43,7 @@ public class AlarmEntity {
     private AlarmType alarmType;
 
     @Type(type = "json")
-    @Column(columnDefinition = "json")
+    @Column(columnDefinition = "text")
     private AlarmArgs args;
 
     @Column(name = "registered_at")
