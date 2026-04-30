@@ -21,21 +21,35 @@
 
 ## 화면 미리보기
 
+모든 이미지는 모바일 기준 캡처입니다.
+
 ### 로그인
 
-![로그인](front-end/screenshots/sns-login-desktop.png)
+![로그인](front-end/screenshots/mobile/mobile-login.png)
+
+### 회원가입
+
+![회원가입](front-end/screenshots/mobile/mobile-signup.png)
 
 ### 피드
 
-![피드](front-end/screenshots/sns-feed-desktop-mobilelike.png)
+![피드](front-end/screenshots/mobile/mobile-feed.png)
+
+### 게시글 작성
+
+![게시글 작성](front-end/screenshots/mobile/mobile-post.png)
+
+### 내 게시물
+
+![내 게시물](front-end/screenshots/mobile/mobile-mypost.png)
 
 ### 게시글 상세
 
-![게시글 상세](front-end/screenshots/sns-postdetail-desktop.png)
+![게시글 상세](front-end/screenshots/mobile/mobile-postdetail.png)
 
 ### 알림
 
-![알림](front-end/screenshots/sns-alarms-desktop.png)
+![알림](front-end/screenshots/mobile/mobile-alarms.png)
 
 ## 주요 기능
 
@@ -104,7 +118,7 @@ sns_service/
 │   ├── src/layouts/             # 피드/인증/알림/게시글 화면
 │   ├── src/hooks/               # 무한 스크롤 훅
 │   ├── src/utils/               # 프로필/이미지 메타, 병합 유틸
-│   └── screenshots/             # README용 화면 캡처
+│   └── screenshots/mobile/      # README용 모바일 화면 캡처
 ├── database/                    # DB 도커 설정
 ├── redis/                       # Redis 도커 설정
 └── docker-compose-local.yml
