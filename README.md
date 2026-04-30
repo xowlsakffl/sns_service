@@ -1,26 +1,68 @@
-﻿# SNS Service
+# SNS Service
 
-SNS Service는 게시글 기반 소셜 피드와 알림 기능을 제공하는 Spring Boot API 서버입니다. 회원가입/로그인, JWT 인증, 게시글/댓글/좋아요, SSE 알림, 신고/블라인드 처리 흐름을 담당합니다.
+`SNS Service`는 게시글 기반 소셜 피드, 댓글, 좋아요, 알림, 신고 처리까지 포함한 풀스택 SNS 프로젝트입니다. 백엔드는 Spring Boot로 인증/도메인/API를 담당하고, 프론트엔드는 React로 피드 경험을 제공합니다.
 
-포트폴리오 관점에서 핵심은 단순 CRUD를 넘어, 인증/인가 기반 쓰기 API 보호, 실시간 알림(SSE), 신고 누적 자동 블라인드, 관리자 신고 처리(승인/반려), 필터 검색 및 대시보드 집계까지 운영형 기능을 백엔드 중심으로 구현한 점입니다.
+포트폴리오 관점에서 이 프로젝트의 프론트 UI는 **Instagram 웹/모바일 피드 구조를 참고한 클론형 인터페이스**로 정리했습니다. 브랜드 요소를 그대로 재사용한 것이 아니라, 피드 카드, 스토리, 하단 탭, 단일 컬럼 소비 흐름 같은 UI 패턴을 참고해 구현했습니다. 현재는 **PC에서도 모바일과 같은 단일 컬럼 레이아웃**으로 동작합니다.
 
-SNS Service는 커뮤니티형 서비스에서 필요한 기본 피드 기능을 빠르게 제공하도록 설계되었습니다. 사용자 인증을 통해 게시글 활동을 보호하고, 좋아요/댓글 이벤트를 알림으로 전달하며, 신고 시스템을 통해 콘텐츠 품질과 안전성을 관리할 수 있도록 구성했습니다.
+## 프로젝트 설명
 
-이 저장소는 그 서비스 중 API/인증/도메인 계층과 프론트 정적 빌드 연동을 담당합니다. 프론트엔드 또는 외부 클라이언트는 REST API와 SSE 구독을 사용해 로그인 상태, 피드 데이터, 알림 스트림, 신고 처리 상태를 동기화합니다.
+- JWT 기반 회원가입/로그인
+- 게시글 작성, 수정, 삭제, 목록 조회, 내 글 조회
+- 댓글 작성 및 조회
+- 좋아요 처리 및 좋아요 수 조회
+- SSE(Server-Sent Events) 기반 알림 구독
+- 신고 누적 기반 자동 블라인드
+- 관리자 신고 처리 및 집계 API
+- 무한 스크롤 기반 피드/알림/댓글 로딩
+- 로컬 실행용 데모 데이터 자동 시드
+
+이 저장소는 백엔드와 프론트엔드를 함께 포함한 통합 레포지토리입니다.  
+즉, 단순한 CRUD 샘플이 아니라 **인증, 실시간 이벤트, 콘텐츠 관리, 프론트 UI 흐름**까지 한 번에 보여주는 형태로 정리했습니다.
+
+## 화면 미리보기
+
+### 로그인
+
+![로그인](front-end/screenshots/sns-login-desktop.png)
+
+### 피드
+
+![피드](front-end/screenshots/sns-feed-desktop-mobilelike.png)
+
+### 게시글 상세
+
+![게시글 상세](front-end/screenshots/sns-postdetail-desktop.png)
+
+### 알림
+
+![알림](front-end/screenshots/sns-alarms-desktop.png)
 
 ## 주요 기능
 
-- 회원가입 및 로그인 API (JWT)
-- 게시글 생성/수정/삭제/목록/내 글 조회
-- 게시글 좋아요 및 좋아요 수 조회
-- 게시글 댓글 작성/조회
-- SSE 기반 알림 구독 및 전송
+### 사용자 기능
+
+- 회원가입 / 로그인
+- 게시글 작성 / 수정 / 삭제
+- 피드 조회
+- 내 게시물 조회
+- 게시글 좋아요
+- 댓글 작성 / 조회
+- 실시간 알림 수신
+
+### 운영/관리 기능
+
 - 게시글 신고 등록
 - 신고 누적 임계치 기반 자동 블라인드
-- 관리자 신고 처리 (블라인드 승인/반려)
-- 관리자 신고 필터 검색 (`status`, `reasonType`, `postId`, `reporterUsername`)
-- 관리자 신고 대시보드 집계 API
-- 요청 유효성 검증 및 전역 예외 응답 처리
+- 관리자 신고 승인 / 반려
+- 관리자 신고 검색 (`status`, `reasonType`, `postId`, `reporterUsername`)
+- 관리자 신고 대시보드 집계
+
+### 프론트 UI 특징
+
+- Instagram 피드 패턴을 참고한 카드형 피드
+- 스토리 바 + 하단 탭 네비게이션
+- PC/모바일 동일 단일 컬럼 레이아웃
+- 페이지네이션 제거 후 무한 스크롤 적용
 
 ## 기술 스택
 
@@ -46,8 +88,8 @@ SNS Service는 커뮤니티형 서비스에서 필요한 기본 피드 기능을
 ```text
 sns_service/
 ├── src/main/java/dev/be/snsservice/
-│   ├── configuration/           # Security, Redis, JWT Filter
-│   ├── controller/              # User/Post API
+│   ├── configuration/           # Security, Redis, JWT, Local seed
+│   ├── controller/              # User/Post/Report API
 │   │   ├── request/             # 요청 DTO
 │   │   └── response/            # 응답 DTO
 │   ├── exception/               # 예외/에러코드/전역 핸들러
@@ -58,68 +100,84 @@ sns_service/
 │   └── util/                    # JWT/유틸
 ├── src/main/resources/
 │   └── application.yml
-├── src/test/                    # 테스트 코드
 ├── front-end/                   # React 프론트엔드
+│   ├── src/layouts/             # 피드/인증/알림/게시글 화면
+│   ├── src/hooks/               # 무한 스크롤 훅
+│   ├── src/utils/               # 프로필/이미지 메타, 병합 유틸
+│   └── screenshots/             # README용 화면 캡처
 ├── database/                    # DB 도커 설정
 ├── redis/                       # Redis 도커 설정
 └── docker-compose-local.yml
 ```
 
-## 실행 준비
+## 실행 방법
 
-```bash
-./gradlew build
-./gradlew bootRun
-```
-
-PowerShell:
+### 1. 백엔드 실행
 
 ```powershell
 .\gradlew.bat build
 .\gradlew.bat bootRun
 ```
 
-프론트 단독 실행:
+로컬 프로필 예시:
 
-```bash
+```powershell
+$env:SPRING_DATASOURCE_URL="jdbc:mariadb://localhost:33306/sns"
+$env:SPRING_DATASOURCE_USERNAME="root"
+$env:SPRING_DATASOURCE_PASSWORD="1234"
+$env:SPRING_PROFILES_ACTIVE="local"
+.\gradlew.bat bootRun -x npmBuild -x npmInstall -x copyFrontEnd
+```
+
+### 2. 프론트엔드 실행
+
+```powershell
 cd front-end
 npm install
 npm run start
 ```
 
-도커(로컬 DB/Redis) 실행:
+### 3. 로컬 인프라 실행
 
-```bash
+```powershell
 docker compose -f docker-compose-local.yml up -d
 ```
 
-## 주요 환경변수
+## 데모 계정
 
-| 변수 | 설명 |
-| --- | --- |
-| `SPRING_DATASOURCE_USERNAME` | MariaDB 사용자명 |
-| `SPRING_DATASOURCE_PASSWORD` | MariaDB 비밀번호 |
-| `JWT_SECRET_KEY` | JWT 서명 키 (`application.yml` 기본값 오버라이드) |
-| `SPRING_PROFILES_ACTIVE` | 실행 프로필 (`local`, `prod`) |
+로컬 `local` 프로필에서는 데모 데이터가 자동으로 들어갑니다.
 
-## 보완한 부분
+- 일반 사용자: `demo / password123!`
+- 관리자 사용자: `admin / admin1234!`
 
-- 프론트 정적 산출물 경로를 `front-end/static`에서 `front-end/build`로 수정
-- DTO 검증(`@Valid`, `@NotBlank`, `@Size`) 및 요청 역직렬화 안정성 보강
-- 게시글 수정/삭제 권한 체크를 엔티티 참조 비교에서 ID 비교로 수정
-- SSE emitter 저장소를 `ConcurrentHashMap`으로 변경해 동시성 안정성 보강
-- SSE 타임아웃 상수값 실제 적용
-- JWT SSE 구독 토큰 파싱 로직 안전화 (`request.getParameter("token")`)
-- 전역 예외 처리에서 런타임 핸들러 시그니처 오류 수정
-- 검증 실패 응답 코드/에러코드 정리 (`INVALID_REQUEST`)
-- 회원가입 시 민감정보 로그 출력 제거
-- JWT 비밀키를 환경변수 기반으로 오버라이드 가능하게 개선
-- 신고/블라인드 도메인 추가
-  - 신고 사유 분류 enum (`SPAM`, `ABUSE`, `SEXUAL`, `HATE`, `ETC`)
-  - 관리자 신고 필터 검색
-  - 관리자 신고 대시보드 집계 API
+자동 생성되는 데이터:
+
+- 사용자 6명
+- 게시글 12개
+- 댓글 8개
+- 좋아요 20개
+- 알림 6개
+- 신고 3개
+
+## 이번 정리에서 보완한 부분
+
+### 백엔드
+
+- 로컬 프로필에서 Redis 미연결 시 인메모리 캐시 fallback 적용
+- 로컬 데모 데이터 자동 시드 추가
+- MariaDB 호환성을 위해 JSON 컬럼을 `TEXT` 기반으로 보정
+- JWT/SSE 구독 처리 안정성 보강
+- 요청 검증과 전역 예외 응답 구조 정리
+
+### 프론트엔드
+
+- 사용자명 매핑 오류 수정
+- PC/모바일 동일 단일 컬럼 레이아웃으로 재정리
+- Instagram 피드 패턴 기반 UI 개선
+- 페이지네이션 제거 후 무한 스크롤 적용
+- 로그인/회원가입 비동기 처리 경고 정리
 
 ## 관련 저장소
 
 - 원격 저장소: `https://github.com/xowlsakffl/sns_service.git`
-- 본 저장소는 백엔드 API와 프론트 정적 리소스 빌드 연동을 포함한 통합 레포입니다.
+- 프론트는 이 저장소의 `front-end` 디렉터리에 포함되어 있습니다.
