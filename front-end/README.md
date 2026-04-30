@@ -17,33 +17,40 @@
 
 모든 이미지는 모바일 기준 캡처입니다.
 
-### 로그인
-
-![로그인](screenshots/mobile/mobile-login.png)
-
-### 회원가입
-
-![회원가입](screenshots/mobile/mobile-signup.png)
-
-### 피드
-
-![피드](screenshots/mobile/mobile-feed.png)
-
-### 게시글 작성
-
-![게시글 작성](screenshots/mobile/mobile-post.png)
-
-### 내 게시물
-
-![내 게시물](screenshots/mobile/mobile-mypost.png)
-
-### 게시글 상세
-
-![게시글 상세](screenshots/mobile/mobile-postdetail.png)
-
-### 알림
-
-![알림](screenshots/mobile/mobile-alarms.png)
+<table>
+  <tr>
+    <td align="center" width="50%"><strong>로그인</strong></td>
+    <td align="center" width="50%"><strong>회원가입</strong></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/mobile/mobile-login.png" alt="로그인" width="100%"></td>
+    <td><img src="screenshots/mobile/mobile-signup.png" alt="회원가입" width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>피드</strong></td>
+    <td align="center"><strong>게시글 작성</strong></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/mobile/mobile-feed.png" alt="피드" width="100%"></td>
+    <td><img src="screenshots/mobile/mobile-post.png" alt="게시글 작성" width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>내 게시물</strong></td>
+    <td align="center"><strong>게시글 상세</strong></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/mobile/mobile-mypost.png" alt="내 게시물" width="100%"></td>
+    <td><img src="screenshots/mobile/mobile-postdetail.png" alt="게시글 상세" width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>알림</strong></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/mobile/mobile-alarms.png" alt="알림" width="100%"></td>
+    <td></td>
+  </tr>
+</table>
 
 ## 실행 방법
 
